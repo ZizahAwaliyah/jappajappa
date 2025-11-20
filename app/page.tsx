@@ -50,7 +50,7 @@ export default function HomePage() {
         
         {/* === DESKTOP NAVBAR (Hanya muncul di md ke atas) === */}
         <nav className="hidden md:flex items-center justify-between px-8 py-4 bg-white shadow-sm sticky top-0 z-50">
-          <div className="text-2xl font-bold text-blue-600">Jappa.</div>
+          <div className="text-2xl font-bold text-blue-600">JappaJappa</div>
           <div className="flex space-x-8 font-medium text-gray-600">
             <a href="#" className="text-blue-600">Home</a>
             <a href="#" className="hover:text-blue-600">Event</a>
