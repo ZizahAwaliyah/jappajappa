@@ -1,17 +1,150 @@
 // app/profile/page.tsx
-import Link from "next/link";
-import Image from "next/image"; // Menggunakan komponen Image dari Next.js
-import { Camera, Edit, ChevronRight, LogOut } from "lucide-react";
-import BottomNavBar from "../components/BottomNavBar"; // Asumsikan BottomNavBar ada di app/components
+"use client"; // Tambahkan ini untuk menggunakan state
 
+import { useState } from "react"; // Impor useState
+import Link from "next/link";
+import Image from "next/image";
+import {
+  Camera,
+  Edit,
+  ChevronRight,
+  LogOut,
+  Save, // Ikon baru
+  X, // Ikon baru
+} from "lucide-react";
+import BottomNavBar from "../components/BottomNavBar";
+
+// --- Data Awal (bisa dari props atau fetch) ---
+const initialUser = {
+  profilePicture:
+    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=300&fit=crop",
+  name: "Nama Anda",
+  displayName: "aaaaaaa",
+  phoneNumber: "+111111111",
+  email: "dudu@dugu.dodo",
+};
+
+/**
+ * Komponen Reusable untuk Bidang yang Dapat Diedit
+ * Ini membantu menghindari pengulangan kode
+ */
+function EditableField({
+  label,
+  fieldName,
+  value,
+  isEditing,
+  onEditClick,
+  onSaveClick,
+  onCancelClick,
+  onChange,
+  type = "text", // Tipe input (text, email, tel)
+}: {
+  label: string;
+  fieldName: string;
+  value: string;
+  isEditing: boolean;
+  onEditClick: () => void;
+  onSaveClick: () => void;
+  onCancelClick: () => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  type?: string;
+}) {
+  return (
+    <div className="p-5">
+      <div className="flex justify-between items-center text-gray-800 mb-2">
+        <span className="font-semibold text-gray-600 text-sm">{label}</span>
+        {/* Tampilkan tombol "Edit" HANYA jika tidak sedang diedit */}
+        {!isEditing && (
+          <button
+            onClick={onEditClick}
+            className="text-blue-600 text-sm font-medium flex items-center hover:underline"
+          >
+            Edit <Edit className="w-3 h-3 ml-1" />
+          </button>
+        )}
+      </div>
+
+      {isEditing ? (
+        // --- Tampilan saat Mode Edit ---
+        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2">
+          <input
+            type={type}
+            name={fieldName}
+            value={value}
+            onChange={onChange}
+            className="flex-grow w-full py-2 px-3 rounded-md border border-gray-300 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <div className="flex space-x-2 mt-2 sm:mt-0">
+            <button
+              onClick={onSaveClick}
+              className="px-3 py-1.5 bg-blue-600 text-white rounded-md text-sm font-semibold hover:bg-blue-700 flex items-center"
+            >
+              <Save className="w-4 h-4 mr-1" />
+              Simpan
+            </button>
+            <button
+              onClick={onCancelClick}
+              className="px-3 py-1.5 bg-gray-200 text-gray-700 rounded-md text-sm font-semibold hover:bg-gray-300 flex items-center"
+            >
+              <X className="w-4 h-4 mr-1" />
+              Batal
+            </button>
+          </div>
+        </div>
+      ) : (
+        // --- Tampilan Statis (Default) ---
+        <p className="text-lg font-medium">{value}</p>
+      )}
+    </div>
+  );
+}
+
+// --- Komponen Halaman Profil Utama ---
 export default function ProfilePage() {
-  const user = {
-    profilePicture:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=300&fit=crop",
-    name: "Nama Anda",
-    displayName: "dudududu",
-    phoneNumber: "+111111111",
-    email: "dudu@dugu.dodo",
+  // State untuk melacak data user yang "tersimpan"
+  const [currentUser, setCurrentUser] = useState(initialUser);
+  
+  // State untuk melacak data di form (saat diedit)
+  const [formData, setFormData] = useState(initialUser);
+
+  // State untuk melacak bidang mana yang sedang diedit
+  // (null, 'displayName', 'phoneNumber', 'email')
+  const [editingField, setEditingField] = useState<string | null>(null);
+
+  // --- Handlers untuk Aksi Edit ---
+
+  // Dipanggil saat input berubah
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // Dipanggil saat tombol "Edit" diklik
+  const handleEditClick = (fieldName: string) => {
+    setEditingField(fieldName);
+    // Pastikan form di-reset ke data terbaru jika ada pembatalan sebelumnya
+    setFormData(currentUser); 
+  };
+
+  // Dipanggil saat tombol "Batal" diklik
+  const handleCancelClick = () => {
+    setEditingField(null);
+    setFormData(currentUser); // Kembalikan data form ke data yang tersimpan
+  };
+
+  // Dipanggil saat tombol "Simpan" diklik
+  const handleSaveClick = (fieldName: string) => {
+    // Di aplikasi nyata, di sinilah Anda akan memanggil API untuk menyimpan data
+    console.log("Menyimpan data:", { [fieldName]: formData[fieldName] });
+
+    // Simulasikan penyimpanan berhasil dengan memperbarui state currentUser
+    setCurrentUser(formData);
+    
+    // Tutup mode edit
+    setEditingField(null);
   };
 
   return (
@@ -33,7 +166,7 @@ export default function ProfilePage() {
             {/* Background Image */}
             <div className="absolute inset-0 z-0">
               <Image
-                src={user.profilePicture}
+                src={currentUser.profilePicture}
                 alt="Profile Background"
                 fill
                 className="object-cover rounded-2xl opacity-70"
@@ -54,47 +187,49 @@ export default function ProfilePage() {
                   <Edit className="w-4 h-4" />
                 </button>
               </div>
-              <h2 className="text-2xl font-bold">{user.name}</h2>
+              <h2 className="text-2xl font-bold">{currentUser.name}</h2>
             </div>
           </section>
 
           {/* === Detail Informasi Pengguna === */}
-          <section className="mx-4 mt-6 bg-white rounded-2xl shadow-lg md:mx-0">
-            <div className="p-5 border-b border-gray-200">
-              <div className="flex justify-between items-center text-gray-800 mb-2">
-                <span className="font-semibold text-gray-600 text-sm">
-                  Nama Tampilan
-                </span>
-                <button className="text-blue-600 text-sm font-medium flex items-center hover:underline">
-                  Edit <Edit className="w-3 h-3 ml-1" />
-                </button>
-              </div>
-              <p className="text-lg font-medium">{user.displayName}</p>
-            </div>
+          {/* Menggunakan 'divide-y' untuk memberi garis pemisah antar anak 
+            Ini lebih rapi daripada memberi 'border-b' di dalam komponen
+          */}
+          <section className="mx-4 mt-6 bg-white rounded-2xl shadow-lg md:mx-0 divide-y divide-gray-200">
+            <EditableField
+              label="Nama Tampilan"
+              fieldName="displayName"
+              value={formData.displayName} // Gunakan data dari form
+              isEditing={editingField === "displayName"}
+              onEditClick={() => handleEditClick("displayName")}
+              onSaveClick={() => handleSaveClick("displayName")}
+              onCancelClick={handleCancelClick}
+              onChange={handleChange}
+            />
 
-            <div className="p-5 border-b border-gray-200">
-              <div className="flex justify-between items-center text-gray-800 mb-2">
-                <span className="font-semibold text-gray-600 text-sm">
-                  No Handphone
-                </span>
-                <button className="text-blue-600 text-sm font-medium flex items-center hover:underline">
-                  Edit <Edit className="w-3 h-3 ml-1" />
-                </button>
-              </div>
-              <p className="text-lg font-medium">{user.phoneNumber}</p>
-            </div>
+            <EditableField
+              label="No Handphone"
+              fieldName="phoneNumber"
+              value={formData.phoneNumber} // Gunakan data dari form
+              isEditing={editingField === "phoneNumber"}
+              onEditClick={() => handleEditClick("phoneNumber")}
+              onSaveClick={() => handleSaveClick("phoneNumber")}
+              onCancelClick={handleCancelClick}
+              onChange={handleChange}
+              type="tel"
+            />
 
-            <div className="p-5">
-              <div className="flex justify-between items-center text-gray-800 mb-2">
-                <span className="font-semibold text-gray-600 text-sm">
-                  E-Mail
-                </span>
-                <button className="text-blue-600 text-sm font-medium flex items-center hover:underline">
-                  Edit <Edit className="w-3 h-3 ml-1" />
-                </button>
-              </div>
-              <p className="text-lg font-medium">{user.email}</p>
-            </div>
+            <EditableField
+              label="E-Mail"
+              fieldName="email"
+              value={formData.email} // Gunakan data dari form
+              isEditing={editingField === "email"}
+              onEditClick={() => handleEditClick("email")}
+              onSaveClick={() => handleSaveClick("email")}
+              onCancelClick={handleCancelClick}
+              onChange={handleChange}
+              type="email"
+            />
           </section>
 
           {/* === Bagian Wishlist & Riwayat Rating === */}
@@ -125,7 +260,6 @@ export default function ProfilePage() {
       </main>
 
       {/* === NAVIGASI BAWAH (Hanya muncul di HP) === */}
-      {/* Pastikan komponen BottomNavBar Anda berada di app/components/BottomNavBar.tsx */}
       <BottomNavBar />
     </>
   );
