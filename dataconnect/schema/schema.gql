@@ -1,0 +1,45 @@
+type User @table {
+  displayName: String!
+  createdAt: Timestamp!
+  email: String
+  photoUrl: String
+}
+
+type Event @table {
+  creator: User!
+  name: String!
+  startDate: Timestamp!
+  endDate: Timestamp!
+  location: String!
+  createdAt: Timestamp!
+  description: String
+  isPublic: Boolean
+}
+
+type Invitation @table(key: ["event", "guest"]) {
+  event: Event!
+  guest: User!
+  status: String!
+  createdAt: Timestamp!
+}
+
+type Flight @table {
+  event: Event!
+  airline: String!
+  flightNumber: String!
+  departureAirport: String!
+  arrivalAirport: String!
+  departureTime: Timestamp!
+  arrivalTime: Timestamp!
+  bookingReference: String
+}
+
+type Accommodation @table {
+  event: Event!
+  name: String!
+  address: String!
+  checkInDate: Date!
+  checkOutDate: Date!
+  bookingReference: String
+  contactInformation: String
+}
