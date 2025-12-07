@@ -98,6 +98,17 @@ export default function JappaDetailPage() {
                 {item.title}
             </h1>
             
+            {/* Category Badge */}
+            {item.category && (
+              <div className="mb-3">
+                <span className={`inline-block px-4 py-1.5 rounded-full text-xs font-bold text-white ${
+                  item.category === "wisata" ? "bg-green-600" : "bg-purple-600"
+                }`}>
+                  {item.category === "wisata" ? "🏖️ Wisata" : "🎭 Event"}
+                </span>
+              </div>
+            )}
+            
             {/* Metadata (Author & Date) */}
             <div className="flex items-center space-x-4 text-sm text-gray-500 mb-8 pb-4 border-b border-gray-100">
               <div className="flex items-center">

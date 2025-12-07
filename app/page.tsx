@@ -209,7 +209,7 @@ export default function HomePage() {
             ) : (
               <div className="flex flex-col space-y-6">
                 {jappaNowItems.map((item) => (
-                  <Link href={`/jappa/${item.id}`} key={item.id} className="flex items-start gap-4 group cursor-pointer bg-white p-3 rounded-2xl hover:shadow-md transition-shadow md:bg-transparent md:p-0 md:hover:shadow-none">
+                  <Link href={`/jappanow/${item.id}`} key={item.id} className="flex items-start gap-4 group cursor-pointer bg-white p-3 rounded-2xl hover:shadow-md transition-shadow md:bg-transparent md:p-0 md:hover:shadow-none">
                     <div className="relative w-32 h-24 md:w-52 md:h-36 bg-gray-200 rounded-2xl overflow-hidden flex-shrink-0 shadow-sm">
                       {item.image && <Image src={item.image} alt={item.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />}
                     </div>

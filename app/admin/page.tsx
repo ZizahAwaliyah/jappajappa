@@ -63,7 +63,7 @@ export default function AdminDashboardPage() {
 
   // Form State Jappa
   const [newJappa, setNewJappa] = useState({
-    title: '', description: '', content: ''
+    title: '', description: '', content: '', imageUrl: ''
   });
   const [jappaImageFile, setJappaImageFile] = useState<File | null>(null);
 
@@ -174,32 +174,31 @@ export default function AdminDashboardPage() {
   // --- HANDLER JAPPA NOW ---
   const handleAddJappa = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!jappaImageFile) return alert("Gambar artikel wajib diupload!");
+    if (!newJappa.title.trim() || !newJappa.content.trim()) return alert("Judul dan konten artikel harus diisi!");
+    
+    if (newJappa.imageUrl && !newJappa.imageUrl.startsWith("http")) {
+      return alert("URL gambar tidak valid. Harus dimulai dengan http:// atau https://");
+    }
+
     setIsSubmitting(true);
     setUploadProgress(10);
 
     try {
-        const compressed = await compressImage(jappaImageFile);
-        const imgRef = ref(storage, `jappa/${Date.now()}_${jappaImageFile.name}`);
-        await uploadBytes(imgRef, compressed);
-        const imageUrl = await getDownloadURL(imgRef);
-        setUploadProgress(50);
-
-        const contentArray = newJappa.content.split('\n').filter(line => line.trim() !== '');
-
         await addDoc(collection(db, "jappa_posts"), {
             title: newJappa.title,
             description: newJappa.description,
-            content: contentArray, 
-            image: imageUrl,
+            content: newJappa.content, 
+            image: newJappa.imageUrl || null,
+            category: "event",
             author: "Admin Jappa",
-            createdAt: serverTimestamp()
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
         });
 
         setUploadProgress(100);
         alert("Artikel Jappa Now berhasil dipublish!");
         setIsAddJappaModalOpen(false);
-        setNewJappa({ title: '', description: '', content: '' });
+        setNewJappa({ title: '', description: '', content: '', imageUrl: '' });
         setJappaImageFile(null);
     } catch (error: any) {
         alert(`Gagal: ${error.message}`);
@@ -406,8 +405,9 @@ export default function AdminDashboardPage() {
                         <textarea required placeholder="Tulis artikel di sini. Gunakan Enter untuk paragraf baru..." className="w-full p-3 border border-gray-300 rounded-xl text-sm h-32 resize-none focus:ring-2 focus:ring-black outline-none" value={newJappa.content} onChange={e => setNewJappa({...newJappa, content: e.target.value})}></textarea>
                     </div>
                     <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-1">Foto Utama</label>
-                        <input type="file" required accept="image/*" className="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200" onChange={e => setJappaImageFile(e.target.files ? e.target.files[0] : null)} />
+                        <label className="block text-xs font-bold text-gray-700 mb-1">URL Foto Utama</label>
+                        <input type="url" placeholder="https://example.com/image.jpg" className="w-full p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-black outline-none" value={newJappa.imageUrl} onChange={e => setNewJappa({...newJappa, imageUrl: e.target.value})} />
+                        <p className="text-xs text-gray-500 mt-1">💡 Gunakan URL dari Cloudinary, Imgur, atau hosting lainnya</p>
                     </div>
                      {isSubmitting && uploadProgress > 0 && (
                         <div className="space-y-2">
