@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Search, MapPin, ChevronDown, Star, Loader2 } from "lucide-react"; 
 import BottomNavBar from "../components/Header";
 import ProfileDropdown from "../components/ProfileDropdown"; 
@@ -30,6 +31,9 @@ const categories = [
 ];
 
 export default function WisataPage() {
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get("q") || "";
+
   // State untuk Data dari Firebase
   const [wisataList, setWisataList] = useState<any[]>([]); 
   const [loading, setLoading] = useState(true);
@@ -37,7 +41,7 @@ export default function WisataPage() {
   // State Filter
   const [selectedCity, setSelectedCity] = useState("Semua Kota");
   const [selectedCategory, setSelectedCategory] = useState("Semua Kategori");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
 
   // 1. FETCH DATA REAL-TIME DARI FIREBASE
   useEffect(() => {
@@ -65,8 +69,10 @@ export default function WisataPage() {
     // Filter Kota (Cek apakah string lokasi mengandung nama kota)
     const matchCity = selectedCity === "Semua Kota" || (item.location && item.location.toLowerCase().includes(selectedCity.toLowerCase()));
     
-    // Filter Pencarian (Judul)
-    const matchSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase());
+    // Filter Pencarian (Judul atau Lokasi) - gunakan field `title` yang sebenarnya
+    const matchSearch = !searchQuery || 
+                       item.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                       item.location?.toLowerCase().includes(searchQuery.toLowerCase());
 
     return matchCategory && matchCity && matchSearch;
   });
