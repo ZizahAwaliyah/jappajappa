@@ -1,54 +1,76 @@
 "use client";
 
+import { useState, useEffect } from "react"; 
 import Image from "next/image";
 import Link from "next/link";
-import { Search, MapPin } from "lucide-react"; // Bell dihapus
+import { Search, MapPin, Loader2 } from "lucide-react";
+
+// --- IMPORT KOMPONEN ---
 import BottomNavBar from "./components/Header";
 import EventCountdown from "./components/Countdown";
+import ProfileDropdown from "./components/ProfileDropdown";
+
+// --- IMPORT SWIPER ---
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Mousewheel } from 'swiper/modules'; 
 import 'swiper/css';
 import 'swiper/css/pagination';
-import ProfileDropdown from "./components/ProfileDropdown";
 
-// --- DATA DUMMY ---
-const upcomingEvents = [
-  { id: 1, title: 'Konser Senja', location: 'Pantai Losari', date: '2025-11-25T17:00:00' },
-  { id: 2, title: 'RITECH 2025', location: 'CPI Makassar', date: '2025-12-01T09:00:00' },
-  { id: 3, title: 'Festival Coto', location: 'Fort Rotterdam', date: '2025-11-21T08:00:00' },
-  { id: 4, title: 'Jazz Pantai Bira', location: 'Tanjung Bira', date: '2025-12-15T16:00:00' },
-  { id: 5, title: 'Pameran UMKM', location: 'Trans Studio', date: '2025-12-20T10:00:00' },
-];
-
-const topPicks = [
-  { id: 1, title: 'Pantai Bira', location: 'Bulukumba' },
-  { id: 2, title: 'Malino Highland', location: 'Gowa' },
-  { id: 3, title: 'Rammang-Rammang', location: 'Maros' },
-  { id: 4, title: 'Pulau Samalona', location: 'Makassar' },
-];
-
-const jappaNowItems = [
-  {
-    id: 1,
-    title: 'Nongkrong Asik di Senja',
-    description: 'Nikmati suasana sore yang tenang dengan kopi khas Makassar. Tempat ini sangat cocok untuk melepas penat setelah bekerja seharian.',
-    image: 'https://images.unsplash.com/photo-1563805042-60734c98602a?q=80&w=1000&auto=format&fit=crop'
-  },
-  {
-    id: 2,
-    title: 'Kuliner Malam Legendaris',
-    description: 'Jelajahi rasa otentik kuliner malam yang tak pernah tidur. Dari Coto hingga Pisang Epe, semuanya ada di sini.',
-    image: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=1000&auto=format&fit=crop'
-  },
-  {
-    id: 3,
-    title: 'Museum Sejarah Kota',
-    description: 'Belajar sejarah kota Makassar di museum yang estetik dan penuh informasi. Cocok untuk wisata edukasi keluarga.',
-    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1000&auto=format&fit=crop'
-  }
-];
+// --- FIREBASE ---
+import { db } from "@/lib/firebase";
+import { collection, query, where, orderBy, limit, onSnapshot } from "firebase/firestore";
 
 export default function HomePage() {
+  const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
+  const [topPicks, setTopPicks] = useState<any[]>([]);
+  const [jappaNowItems, setJappaNowItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // 1. Fetch Events (Hanya yang status 'Actual' / approved oleh admin)
+    const qEvents = query(
+      collection(db, "events"),
+      where("status", "==", "Actual"),
+      orderBy("createdAt", "desc"),
+      limit(5)
+    );
+
+    // 2. Fetch Wisata (Top Picks - Ambil 5 terbaru)
+    const qWisata = query(
+      collection(db, "wisata"),
+      orderBy("createdAt", "desc"),
+      limit(5)
+    );
+
+    // 3. Fetch Jappa Now
+    const qJappa = query(
+      collection(db, "jappa_posts"),
+      orderBy("createdAt", "desc"),
+      limit(3)
+    );
+
+    // Listeners
+    const unsubEvents = onSnapshot(qEvents, (snap) => {
+      setUpcomingEvents(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    const unsubWisata = onSnapshot(qWisata, (snap) => {
+      setTopPicks(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    const unsubJappa = onSnapshot(qJappa, (snap) => {
+      setJappaNowItems(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setLoading(false); // Matikan loading setelah data termuat
+    });
+
+    return () => {
+      unsubEvents();
+      unsubWisata();
+      unsubJappa();
+    };
+  }, []);
+
+  if (loading) return <div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-blue-600" /></div>;
 
   return (
     <>
@@ -62,11 +84,7 @@ export default function HomePage() {
             <Link href="/event" className="hover:text-blue-600 transition-colors">Event</Link>
             <Link href="/wisata" className="hover:text-blue-600 transition-colors">Wisata</Link>
           </div>
-          
           <div className="flex items-center space-x-4">
-            {/* Lonceng dihapus */}
-            
-            {/* --- PROFILE DROPDOWN --- */}
             <ProfileDropdown />
           </div>
         </nav>
@@ -109,47 +127,50 @@ export default function HomePage() {
                 </Link>
               </div>
 
-              <Swiper
-                modules={[Pagination, Mousewheel]} 
-                spaceBetween={16}
-                slidesPerView={2.2} 
-                grabCursor={true}   
-                mousewheel={true}   
-                pagination={{ clickable: true }}
-                breakpoints={{
-                  640: { slidesPerView: 2.5 },
-                  768: { slidesPerView: 3 },
-                  1024: { slidesPerView: 3.5 },
-                }}
-                className="pb-20" 
-              >
-                {upcomingEvents.map((event) => (
-                  <SwiperSlide key={event.id}>
-                    <Link href={`/event/${event.id}`} className="group cursor-pointer block h-full">
-                      <div className="aspect-square bg-gray-100 rounded-xl md:rounded-2xl relative overflow-hidden shadow-inner border border-gray-100 mb-3">
-                        <div className="absolute inset-0 bg-gray-300 group-hover:scale-105 transition-transform duration-500">
-                           <Image 
-                               src={`https://source.unsplash.com/random/500x500?concert&sig=${event.id}`} 
-                               alt={event.title} 
-                               fill 
-                               className="object-cover" 
-                             />
+              {upcomingEvents.length === 0 ? (
+                 <p className="text-center text-gray-400 py-10">Belum ada event yang tersedia.</p>
+              ) : (
+                <Swiper
+                  modules={[Pagination, Mousewheel]} 
+                  spaceBetween={16}
+                  slidesPerView={2.2} 
+                  grabCursor={true}   
+                  mousewheel={true}   
+                  pagination={{ clickable: true }}
+                  breakpoints={{
+                    640: { slidesPerView: 2.5 },
+                    768: { slidesPerView: 3 },
+                    1024: { slidesPerView: 3.5 },
+                  }}
+                  className="pb-20" 
+                >
+                  {upcomingEvents.map((event) => (
+                    <SwiperSlide key={event.id}>
+                      <Link href={`/event/${event.id}`} className="group cursor-pointer block h-full">
+                        <div className="aspect-square bg-gray-100 rounded-xl md:rounded-2xl relative overflow-hidden shadow-inner border border-gray-100 mb-3">
+                          <div className="absolute inset-0 bg-gray-300 group-hover:scale-105 transition-transform duration-500">
+                            {event.image ? (
+                               <Image src={event.image} alt={event.title} fill className="object-cover" />
+                            ) : (
+                               <div className="w-full h-full bg-gray-200" />
+                            )}
+                          </div>
+                          <div className="absolute top-2 right-2 z-10">
+                            <EventCountdown targetDate={`${event.date}T${event.time || '00:00:00'}`} />
+                          </div>
                         </div>
-                        <div className="absolute top-2 right-2 z-10">
-                          <EventCountdown targetDate={event.date} />
-                        </div>
-                      </div>
-                      <h3 className="text-sm md:text-lg font-bold text-gray-800 truncate px-1">
-                        {event.title}
-                      </h3>
-                    </Link>
-                  </SwiperSlide>
-                ))}
-              </Swiper>
+                        <h3 className="text-sm md:text-lg font-bold text-gray-800 truncate px-1">
+                          {event.title}
+                        </h3>
+                      </Link>
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              )}
             </div>
           </div>
 
-          {/* === TOP PICKS === */}
+          {/* === TOP PICKS (WISATA) === */}
           <section className="mb-12">
             <div className="flex justify-between items-center mb-4">
                <h2 className="text-lg md:text-2xl font-bold text-gray-900">Top Picks of the Month</h2>
@@ -158,28 +179,27 @@ export default function HomePage() {
                </Link>
             </div>
             
-            <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide md:grid md:grid-cols-4 md:gap-6 md:space-x-0 md:pb-0">
-              {topPicks.map((pick) => (
-                <Link href={`/wisata/${pick.id}`} key={pick.id} className="flex-shrink-0 w-32 md:w-full flex flex-col group cursor-pointer">
-                  <div className="h-40 md:h-52 w-full bg-gray-200 rounded-2xl shadow-sm mb-3 relative overflow-hidden">
-                     <div className="absolute inset-0 bg-gray-300 group-hover:bg-gray-400 transition-colors duration-300">
-                        <Image 
-                          src={`https://source.unsplash.com/random/300x400?nature&sig=${pick.id}`} 
-                          alt={pick.title} 
-                          fill 
-                          className="object-cover" 
-                        />
-                     </div>
-                  </div>
-                  <h3 className="text-sm md:text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-                    {pick.title}
-                  </h3>
-                  <p className="text-[10px] md:text-sm text-gray-500 flex items-center mt-1">
-                    <MapPin className="w-3 h-3 mr-1" /> {pick.location}
-                  </p>
-                </Link>
-              ))}
-            </div>
+            {topPicks.length === 0 ? (
+               <p className="text-gray-400 text-sm">Belum ada data wisata.</p>
+            ) : (
+              <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide md:grid md:grid-cols-4 md:gap-6 md:space-x-0 md:pb-0">
+                {topPicks.map((pick) => (
+                  <Link href={`/wisata/${pick.id}`} key={pick.id} className="flex-shrink-0 w-32 md:w-full flex flex-col group cursor-pointer">
+                    <div className="h-40 md:h-52 w-full bg-gray-200 rounded-2xl shadow-sm mb-3 relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gray-300 group-hover:bg-gray-400 transition-colors duration-300">
+                          {pick.image && <Image src={pick.image} alt={pick.title} fill className="object-cover" />}
+                      </div>
+                    </div>
+                    <h3 className="text-sm md:text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                      {pick.title}
+                    </h3>
+                    <p className="text-[10px] md:text-sm text-gray-500 flex items-center mt-1">
+                      <MapPin className="w-3 h-3 mr-1" /> {pick.location}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            )}
           </section>
 
           {/* === JAPPA NOW === */}
@@ -187,23 +207,28 @@ export default function HomePage() {
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-lg md:text-2xl font-bold text-gray-900">Jappa Now</h2>
             </div>
-            <div className="flex flex-col space-y-6">
-              {jappaNowItems.map((item) => (
-                <Link href={`/jappa/${item.id}`} key={item.id} className="flex items-start gap-4 group cursor-pointer bg-white p-3 rounded-2xl hover:shadow-md transition-shadow md:bg-transparent md:p-0 md:hover:shadow-none">
-                  <div className="relative w-32 h-24 md:w-52 md:h-36 bg-gray-200 rounded-2xl overflow-hidden flex-shrink-0 shadow-sm">
-                     <Image src={item.image} alt={item.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                  </div>
-                  <div className="flex-1 py-1">
-                    <h3 className="font-bold text-gray-900 text-base md:text-xl mb-2 group-hover:text-blue-600 transition-colors">
-                      {item.title}
-                    </h3>
-                    <p className="text-xs md:text-sm text-gray-600 leading-relaxed line-clamp-3 md:line-clamp-none">
-                      {item.description}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
+            
+            {jappaNowItems.length === 0 ? (
+               <p className="text-gray-400 text-sm">Belum ada artikel terbaru.</p>
+            ) : (
+              <div className="flex flex-col space-y-6">
+                {jappaNowItems.map((item) => (
+                  <Link href={`/jappa/${item.id}`} key={item.id} className="flex items-start gap-4 group cursor-pointer bg-white p-3 rounded-2xl hover:shadow-md transition-shadow md:bg-transparent md:p-0 md:hover:shadow-none">
+                    <div className="relative w-32 h-24 md:w-52 md:h-36 bg-gray-200 rounded-2xl overflow-hidden flex-shrink-0 shadow-sm">
+                      {item.image && <Image src={item.image} alt={item.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />}
+                    </div>
+                    <div className="flex-1 py-1">
+                      <h3 className="font-bold text-gray-900 text-base md:text-xl mb-2 group-hover:text-blue-600 transition-colors">
+                        {item.title}
+                      </h3>
+                      <p className="text-xs md:text-sm text-gray-600 leading-relaxed line-clamp-3 md:line-clamp-none">
+                        {item.description}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </section>
 
         </div>

@@ -45,16 +45,25 @@ export default function SignUpPage() {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
+      console.log('Google sign up success:', user.uid);
+      
       // Save minimal profile to Firestore
       await setDoc(doc(db, 'users', user.uid), {
         displayName: user.displayName || username || null,
         email: user.email || null,
         phone: user.phoneNumber || phone || null,
         photoURL: user.photoURL || null,
+        role: 'user',
         createdAt: serverTimestamp(),
       });
+      
+      // Set isLoggedIn flag
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('userRole', 'user');
+      
       router.push('/');
     } catch (err: any) {
+      console.error('Google sign up error:', err);
       setError(err?.message || 'Gagal daftar dengan Google');
     } finally {
       setLoading(false);
@@ -68,15 +77,24 @@ export default function SignUpPage() {
       const provider = new OAuthProvider('apple.com');
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
+      console.log('Apple sign up success:', user.uid);
+      
       await setDoc(doc(db, 'users', user.uid), {
         displayName: user.displayName || username || null,
         email: user.email || null,
         phone: user.phoneNumber || phone || null,
         photoURL: user.photoURL || null,
+        role: 'user',
         createdAt: serverTimestamp(),
       });
+      
+      // Set isLoggedIn flag
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('userRole', 'user');
+      
       router.push('/');
     } catch (err: any) {
+      console.error('Apple sign up error:', err);
       setError(err?.message || 'Gagal daftar dengan Apple');
     } finally {
       setLoading(false);
@@ -94,23 +112,40 @@ export default function SignUpPage() {
       setError('Email wajib diisi');
       return;
     }
+    if (password.length < 6) {
+      setError('Password minimal 6 karakter');
+      return;
+    }
     setLoading(true);
     try {
+      console.log('Starting sign up with email:', email);
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       const user = cred.user;
+      console.log('User created:', user.uid);
+      
       // update display name
       if (username) {
         await updateProfile(user, { displayName: username });
+        console.log('Display name updated');
       }
+      
       // save extra profile data to Firestore
       await setDoc(doc(db, 'users', user.uid), {
         displayName: username || null,
         email: user.email || null,
         phone: phone || null,
+        role: 'user',
         createdAt: serverTimestamp(),
       });
+      console.log('User data saved to Firestore');
+      
+      // Set isLoggedIn flag untuk ProfileDropdown
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('userRole', 'user');
+      
       router.push('/');
     } catch (err: any) {
+      console.error('Sign up error:', err);
       setError(err?.message || 'Gagal membuat akun');
     } finally {
       setLoading(false);

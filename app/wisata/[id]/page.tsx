@@ -3,30 +3,15 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation"; 
-import { ChevronLeft, ThumbsUp, Link as LinkIcon, MessageCircle, Instagram, Clock, Map, Loader2, Star, Send } from "lucide-react"; 
-import BottomNavBar from "../../components/Header"; 
-import WishlistButton from "../../components/WishlistButton"; 
+import { useParams, useSearchParams } from "next/navigation";
+import { ChevronLeft, ThumbsUp, Link as LinkIcon, MessageCircle, Instagram, Clock, Map, Loader2, Star, Send } from "lucide-react";
+import BottomNavBar from "../../components/Header";
+import WishlistButtonDetail from "../../components/WishlistButtonDetail";
 // IMPORT FIREBASE
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-
-// DATA DUMMY WISATA (untuk preview UI/UX tanpa Firebase)
-const dummyWisata = {
-  title: "Pantai Losari",
-  location: "Makassar, Sulawesi Selatan",
-  mainImage: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop",
-  openHours: "06:00 - 22:00 WITA",
-  gmapsLink: "https://maps.app.goo.gl/example",
-  description1: "Pantai Losari adalah ikon wisata Kota Makassar yang terkenal dengan keindahan sunset-nya. Terletak di jantung kota, pantai ini menjadi tempat favorit warga lokal dan wisatawan untuk bersantai sambil menikmati pemandangan laut yang memukau.",
-  description2: "Selain menikmati pemandangan, pengunjung juga dapat mencicipi berbagai kuliner khas Makassar di sepanjang pantai. Pisang Epe, Pallu Butung, dan Es Palu Butung adalah beberapa makanan yang wajib dicoba. Suasana pantai yang ramai di sore hari memberikan pengalaman yang tak terlupakan bagi setiap pengunjung.",
-  gallery: [
-    "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=400&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1520454974749-611b7248ffdb?w=400&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=400&auto=format&fit=crop"
-  ]
-};
+import { collection, doc, getDoc, query, where, onSnapshot } from "firebase/firestore";
+import { addDoc, serverTimestamp } from "firebase/firestore";
 
 export default function WisataDetailPage() {
   const params = useParams();
@@ -34,140 +19,100 @@ export default function WisataDetailPage() {
   const fromSearch = searchParams.get('from') === 'search';
   const backLink = fromSearch ? "/search" : "/wisata";
 
-  const [wisata] = useState<any>(dummyWisata); // Gunakan dummy data sebagai default
+  const [wisata, setWisata] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [likes, setLikes] = useState(12);
   const [hasLiked, setHasLiked] = useState(false);
-  
-  // --- STATE UNTUK REVIEW ---
-  // DATA DUMMY UNTUK REVIEW (Sementara untuk melihat UI/UX)
-  const dummyReviews = [
-    {
-      id: "1",
-      userName: "Siti Nurhaliza",
-      rating: 5,
-      comment: "Tempatnya sangat indah! Pemandangannya luar biasa, cocok banget untuk liburan keluarga. Fasilitasnya juga lengkap dan bersih. Pasti akan kembali lagi!",
-      createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) // 2 hari lalu
-    },
-    {
-      id: "2",
-      userName: "Budi Santoso",
-      rating: 4,
-      comment: "Pengalaman yang menyenangkan. Lokasinya mudah dijangkau dan suasananya tenang. Hanya saja agak ramai di akhir pekan, tapi overall recommended!",
-      createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) // 5 hari lalu
-    },
-    {
-      id: "3",
-      userName: "Dewi Lestari",
-      rating: 5,
-      comment: "Subhanallah, indahnya! Spot foto banyak banget dan Instagramable. Petugasnya juga ramah-ramah. Worth it banget datang ke sini!",
-      createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // 7 hari lalu
-    },
-    {
-      id: "4",
-      userName: "Ahmad Rizki",
-      rating: 4,
-      comment: "Tempat wisata yang bagus untuk healing. Udaranya sejuk dan pemandangannya asri. Makanan di sekitar juga enak-enak. Recommended!",
-      createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000) // 10 hari lalu
-    },
-    {
-      id: "5",
-      userName: "Rina Kusuma",
-      rating: 5,
-      comment: "Sempurna! Dari awal masuk sampai pulang semuanya memuaskan. Anak-anak juga senang banget. Terima kasih untuk pengalaman yang tak terlupakan!",
-      createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000) // 14 hari lalu
-    },
-    {
-      id: "6",
-      userName: "Fajar Nugroho",
-      rating: 3,
-      comment: "Lumayan bagus, tapi harga tiket masuk agak mahal menurut saya. Tapi kalau untuk pengalaman sekali-kali boleh lah dicoba.",
-      createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000) // 20 hari lalu
-    }
-  ];
-
-  const [reviews, setReviews] = useState<any[]>(dummyReviews);
+  const [reviews, setReviews] = useState<any[]>([]);
   const [userRating, setUserRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
 
   // 1. CEK USER LOGIN
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log("Auth state changed:", user?.email);
       setCurrentUser(user);
     });
     return () => unsubscribe();
   }, []);
 
-  // 2. FETCH DETAIL WISATA - DISABLED (Menggunakan dummy data)
+  // 2. FETCH DETAIL WISATA
   useEffect(() => {
-    // Simulasi loading
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
-
-    // KODE ASLI UNTUK FIREBASE (Dinonaktifkan sementara):
-    // const fetchWisata = async () => {
-    //     if (!params.id) return;
-    //     const docRef = doc(db, "wisata", params.id as string);
-    //     const docSnap = await getDoc(docRef);
-    //     if (docSnap.exists()) {
-    //         setWisata(docSnap.data());
-    //     } else {
-    //         console.log("No such document!");
-    //     }
-    //     setLoading(false);
-    // };
-    // fetchWisata();
+    const fetchWisata = async () => {
+      try {
+        if (!params.id) return;
+        const docRef = doc(db, "wisata", params.id as string);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setWisata(docSnap.data());
+        } else {
+          console.log("No such document!");
+          setWisata(null);
+        }
+      } catch (error) {
+        console.error("Error fetching wisata:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchWisata();
   }, [params.id]);
 
-  // 3. FETCH REVIEWS - DISABLED (Menggunakan dummy data)
-  // useEffect(() => {
-  //   if (!params.id) return;
-  //   const q = query(collection(db, "reviews"), where("wisataId", "==", params.id));
-  //   const unsubscribe = onSnapshot(q, (snapshot) => {
-  //       const reviewsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  //       reviewsData.sort((a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-  //       setReviews(reviewsData);
-  //   });
-  //   return () => unsubscribe();
-  // }, [params.id]);
+  // 3. FETCH REVIEWS
+  useEffect(() => {
+    if (!params.id) return;
+    try {
+      const q = query(collection(db, "reviews"), where("wisataId", "==", params.id));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const reviewsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        reviewsData.sort((a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        setReviews(reviewsData);
+      });
+      return () => unsubscribe();
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+    }
+  }, [params.id]);
 
-  // 4. HANDLE SUBMIT REVIEW (Menggunakan dummy submission)
+  // 4. HANDLE SUBMIT REVIEW
   const handleSubmitReview = async () => {
     if (!currentUser) {
-        alert("Silakan login untuk memberikan ulasan.");
-        return;
+      alert("Silakan login untuk memberikan ulasan.");
+      return;
     }
     if (userRating === 0) {
-        alert("Mohon berikan rating bintang (1-5).");
-        return;
+      alert("Mohon berikan rating bintang (1-5).");
+      return;
     }
     if (!reviewText.trim()) {
-        alert("Mohon tulis pengalaman Anda.");
-        return;
+      alert("Mohon tulis pengalaman Anda.");
+      return;
     }
 
     setIsSubmitting(true);
 
-    // Simulasi loading
-    setTimeout(() => {
-      // Tambahkan review baru ke state (dummy)
-      const newReview = {
-        id: Date.now().toString(),
+    try {
+      await addDoc(collection(db, "reviews"), {
+        wisataId: params.id,
         userName: currentUser.displayName || currentUser.email || "Pengguna Jappa",
+        userId: currentUser.uid,
         rating: userRating,
         comment: reviewText,
-        createdAt: new Date()
-      };
+        createdAt: serverTimestamp()
+      });
 
-      setReviews([newReview, ...reviews]);
       setReviewText("");
       setUserRating(0);
+      alert("✅ Ulasan berhasil ditambahkan!");
+    } catch (error: any) {
+      console.error("Error submitting review:", error);
+      alert(`❌ Gagal: ${error.message}`);
+    } finally {
       setIsSubmitting(false);
-      alert("✅ Ulasan berhasil ditambahkan! (Mode Preview - Data tidak tersimpan ke database)");
-    }, 1000);
+    }
   };
 
   const handleLike = () => {
@@ -190,7 +135,16 @@ export default function WisataDetailPage() {
           <h1 className="text-lg font-bold text-gray-900 flex-1 text-center truncate mx-2">
             {wisata.title}
           </h1>
-          <WishlistButton />
+          <WishlistButtonDetail
+            itemId={params.id as string}
+            itemType="wisata"
+            itemData={{
+              title: wisata.title,
+              image: wisata.mainImage,
+              location: wisata.location || wisata.address,
+              price: wisata.ticketPrice || 0
+            }}
+          />
         </header>
 
         {/* KONTEN UTAMA */}
@@ -244,9 +198,9 @@ export default function WisataDetailPage() {
             <div className="w-full border border-gray-200 rounded-2xl p-6 text-center shadow-sm">
               <h3 className="text-sm font-medium text-gray-900 mb-6 border-b border-gray-100 pb-4">Bagikan</h3>
               <div className="flex justify-around items-center px-4">
-                <button className="flex flex-col items-center group"><div className="w-12 h-12 bg-[#25D366] rounded-full flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform"><MessageCircle className="w-7 h-7" /></div></button>
-                <button className="flex flex-col items-center group"><div className="w-12 h-12 rounded-full flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500"><Instagram className="w-7 h-7" /></div><span className="text-[10px] text-gray-400 mt-2">Instagram</span></button>
-                <button className="flex flex-col items-center group"><div className="w-12 h-12 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-700 shadow-md group-hover:bg-gray-50 transition-colors"><LinkIcon className="w-6 h-6" /></div><span className="text-[10px] text-gray-400 mt-2">Copy Link</span></button>
+                <button className="flex flex-col items-center group"><div className="w-12 h-12 bg-[#25D366] rounded-full flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform"><MessageCircle className="w-7 h-7" /></div><span className="text-[10px] text-gray-600 mt-2 font-medium">WhatsApp</span></button>
+                <button className="flex flex-col items-center group"><div className="w-12 h-12 rounded-full flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500"><Instagram className="w-7 h-7" /></div><span className="text-[10px] text-gray-600 mt-2 font-medium">Instagram</span></button>
+                <button className="flex flex-col items-center group"><div className="w-12 h-12 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-700 shadow-md group-hover:bg-gray-50 transition-colors"><LinkIcon className="w-6 h-6" /></div><span className="text-[10px] text-gray-600 mt-2 font-medium">Copy Link</span></button>
               </div>
             </div>
           </div>

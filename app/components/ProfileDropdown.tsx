@@ -1,165 +1,199 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { User, LogOut, Ticket, LayoutDashboard, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 
 export default function ProfileDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
   const router = useRouter();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const status = localStorage.getItem("isLoggedIn");
       const role = localStorage.getItem("userRole");
+      const name = localStorage.getItem("userName");
       setIsLoggedIn(status === "true");
       setUserRole(role);
+      if (name) setUserName(name);
+
+      // Also listen to Firebase Auth for displayName updates
+      const unsub = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          if (user.displayName) setUserName(user.displayName);
+        } else {
+          setUserName(null);
+        }
+      });
+
+      return () => unsub();
     }
   }, []);
 
-  const handleLogout = () => {
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      // Sign out from Firebase
+      await signOut(auth);
+    } catch (err) {
+      console.error('Firebase sign out error:', err);
+    }
+    
+    // Clear localStorage
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("userRole");
     setIsLoggedIn(false);
     setUserRole(null);
     setIsOpen(false);
+    
+    // Redirect and reload
     router.push("/");
-    window.location.reload(); 
+    window.location.reload();
+  };
+
+  const getIconColor = () => {
+    if (userRole === "admin") return "bg-red-100 text-red-600";
+    if (userRole === "eo") return "bg-orange-100 text-orange-600";
+    return "bg-blue-100 text-blue-600";
   };
 
   return (
-    <div className="relative" onClick={(e) => e.stopPropagation()}>
+    <div className="relative" ref={dropdownRef}>
+      {/* BUTTON PROFILE */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-colors focus:outline-none ${
-          isLoggedIn 
-            ? (userRole === 'admin' ? "bg-red-100 text-red-600" : "bg-blue-100 text-blue-600") 
-            : "bg-gray-200 hover:bg-gray-300 text-gray-600"
+        className={`w-9 h-9 rounded-full flex items-center justify-center cursor-pointer transition-all focus:outline-none ring-2 ring-transparent focus:ring-gray-200 ${
+          isLoggedIn ? getIconColor() : "bg-gray-100 hover:bg-gray-200 text-gray-600"
         }`}
       >
         <User className="w-5 h-5" />
       </button>
 
+      {/* DROPDOWN */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
-          
-          {/* === KONDISI SUDAH LOGIN === */}
+        <div className="absolute right-0 mt-2 w-60 bg-white border border-gray-100 rounded-xl shadow-xl py-2 z-[9999] animate-in fade-in zoom-in-95 duration-100 origin-top-right">
+
+          {/* ===================== */}
+          {/*      SUDAH LOGIN      */}
+          {/* ===================== */}
           {isLoggedIn ? (
             <>
-              <div className="px-4 py-3 border-b border-gray-100 mb-1 bg-gray-50/50">
-                <p className="text-xs text-gray-500">Halo,</p>
-                <p className="text-sm font-bold text-gray-900 capitalize">
-                  {userRole === 'admin' ? 'Admin Jappa' : 'Pengunjung Jappa'}
+              {/* HEADER USER */}
+              <div className="px-5 py-3 border-b border-gray-50 mb-1 bg-gray-50/50 rounded-t-xl">
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-0.5">Halo,</p>
+                <p className="text-sm font-bold text-gray-900 capitalize truncate">
+                  {userRole === "admin"
+                    ? "Admin Jappa"
+                    : userRole === "eo"
+                    ? "Event Organizer"
+                    : (userName ? userName : "Pengunjung")}
                 </p>
               </div>
 
-              {/* --- MENU KHUSUS ADMIN --- */}
-              {userRole === 'admin' ? (
-                <>
-                  <Link
-                    href="/profile" 
-                    className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <User className="w-4 h-4 mr-3" />
-                    Account
+              {/* ADMIN MENU */}
+              {userRole === "admin" && (
+                <div className="py-1">
+                  <Link href="/admin/profile" className="flex items-center px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setIsOpen(false)}>
+                    <User className="w-4 h-4 mr-3 opacity-70" /> Account
                   </Link>
-
-                  <Link
-                    href="/admin/dashboard"
-                    className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <LayoutDashboard className="w-4 h-4 mr-3" />
-                    Dashboard
+                  <Link href="/admin/dashboard" className="flex items-center px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setIsOpen(false)}>
+                    <LayoutDashboard className="w-4 h-4 mr-3 opacity-70" /> Dashboard
                   </Link>
-
-                  {/* PERBAIKAN LINK: Menjadi /admin/sold-ticket (tanpa s) */}
-                  <Link
-                    href="/admin/sold-tickets" 
-                    className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <FileText className="w-4 h-4 mr-3" />
-                    Tiket Terjual
+                  <Link href="/admin/sold-tickets" className="flex items-center px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setIsOpen(false)}>
+                    <FileText className="w-4 h-4 mr-3 opacity-70" /> Tiket Terjual
                   </Link>
-                </>
-              ) : (
-                /* --- MENU KHUSUS USER BIASA --- */
-                <>
-                  <Link
-                    href="/profile"
-                    className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <User className="w-4 h-4 mr-3" />
-                    Account
-                  </Link>
-
-                  <Link
-                    href="/myticket" 
-                    className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <Ticket className="w-4 h-4 mr-3" />
-                    Tiket Saya
-                  </Link>
-                </>
+                </div>
               )}
 
-              <div className="border-t border-gray-100 my-1"></div>
+              {/* EO MENU */}
+              {userRole === "eo" && (
+                <div className="py-1">
+                  <Link href="/event-organizer/profile" className="flex items-center px-5 py-2.5 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors" onClick={() => setIsOpen(false)}>
+                    <User className="w-4 h-4 mr-3 opacity-70" /> Account
+                  </Link>
+                  <Link href="/event-organizer/dashboard" className="flex items-center px-5 py-2.5 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors" onClick={() => setIsOpen(false)}>
+                    <LayoutDashboard className="w-4 h-4 mr-3 opacity-70" /> Dashboard
+                  </Link>
+                  <Link href="/event-organizer/sold-tickets" className="flex items-center px-5 py-2.5 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors" onClick={() => setIsOpen(false)}>
+                    <Ticket className="w-4 h-4 mr-3 opacity-70" /> Tiket Terjual
+                  </Link>
+                </div>
+              )}
 
-              {/* Tombol Logout */}
+              {/* USER BIASA */}
+              {(userRole === "user" || !userRole) && (
+                <div className="py-1">
+                  <Link href="/profile" className="flex items-center px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setIsOpen(false)}>
+                    <User className="w-4 h-4 mr-3 opacity-70" /> Account
+                  </Link>
+                  <Link href="/myticket" className="flex items-center px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setIsOpen(false)}>
+                    <Ticket className="w-4 h-4 h-4 mr-3 opacity-70" /> Tiket Saya
+                  </Link>
+                </div>
+              )}
+
+              {/* LOGOUT BUTTON */}
+              <div className="border-t border-gray-100 my-1"></div>
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                className="w-full flex items-center px-5 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
               >
-                <LogOut className="w-4 h-4 mr-3" />
-                Logout
+                <LogOut className="w-4 h-4 mr-3" /> Logout
               </button>
             </>
           ) : (
-            /* === KONDISI BELUM LOGIN (GUEST) === */
             <>
-              <div className="px-4 py-2 border-b border-gray-100 mb-1">
-                <p className="text-xs text-gray-500 font-medium">Akun Saya</p>
+              {/* ===================== */}
+              {/*      BELUM LOGIN      */}
+              {/* ===================== */}
+              <div className="py-1">
+
+                <div className="px-5 py-2 border-b border-gray-100 mb-1">
+                  <p className="text-xs text-gray-500 font-medium">Akun Saya</p>
+                </div>
+
+                <Link
+                  href="/login"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  Login
+                </Link>
+
+                <Link
+                  href="/signup"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  Sign Up
+                </Link>
+
+                <div className="border-t border-gray-100 my-1"></div>
+
+                <Link
+                  href="/eo-register"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center px-5 py-2.5 text-sm font-semibold text-blue-600 hover:bg-blue-50"
+                >
+                  Event Organizer
+                </Link>
               </div>
-
-              <Link
-                href="/profile" 
-                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                Profile
-              </Link>
-
-              <Link
-                href="/eo-register"
-                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                Event Organizer
-              </Link>
-
-              <div className="border-t border-gray-100 my-1"></div>
-
-              <Link
-                href="/login"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                Login
-              </Link>
-              <Link
-                href="/signup"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                Sign Up
-              </Link>
             </>
           )}
         </div>

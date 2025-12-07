@@ -81,7 +81,7 @@ export default function WishlistPage() {
                     {/* Gambar */}
                     <div className="relative w-28 h-28 bg-gray-200 rounded-xl overflow-hidden flex-shrink-0">
                       <Image
-                        src={item.image}
+                        src={item.image ?? '/logo/apple.svg'}
                         alt={item.title}
                         fill
                         className="object-cover"
