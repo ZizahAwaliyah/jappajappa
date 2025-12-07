@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import Link from "next/link"; 
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Search, MapPin, Calendar, ChevronDown, Loader2 } from "lucide-react"; 
 import BottomNavBar from "../components/Header"; 
 import ProfileDropdown from "../components/ProfileDropdown"; 
@@ -31,13 +32,16 @@ const months = [
 ];
 
 export default function EventPage() {
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get("q") || "";
+  
   const [eventsData, setEventsData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
   // State Filter
   const [selectedCategory, setSelectedCategory] = useState("Semua Event");
   const [selectedMonth, setSelectedMonth] = useState("All"); 
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
 
   // 1. FETCH DATA FIREBASE
   useEffect(() => {
@@ -57,18 +61,19 @@ export default function EventPage() {
     // A. Filter Kategori
     const matchCategory = selectedCategory === "Semua Event" || event.category === selectedCategory;
     
-    // B. Filter Pencarian (Nama Event atau Lokasi)
-    const matchSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                        event.location.toLowerCase().includes(searchQuery.toLowerCase());
+    // B. Filter Pencarian (Nama Event atau Lokasi) - gunakan field 'title' yang sebenarnya
+    const matchSearch = !searchQuery || event.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                        event.location?.toLowerCase().includes(searchQuery.toLowerCase());
     
     // C. Filter Bulan 
-    // Asumsi format date di database adalah YYYY-MM-DD (misal: 2025-11-25)
-    // Kita ambil bagian bulan (index 1 setelah split '-')
+    // Field date di database adalah format YYYY-MM-DD (misal: 2026-02-14)
+    // Bukan startDate, tapi 'date'
     let eventMonth = "";
     if (event.date) {
-        const parts = event.date.split("-");
+        const dateStr = typeof event.date === 'string' ? event.date : event.date;
+        const parts = dateStr.split("-");
         if (parts.length > 1) {
-            eventMonth = parts[1]; // "11"
+            eventMonth = parts[1]; // "02"
         }
     }
     const matchMonth = selectedMonth === "All" || eventMonth === selectedMonth;

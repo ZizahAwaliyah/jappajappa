@@ -3,12 +3,13 @@
 import { useState, useEffect } from "react"; 
 import Image from "next/image";
 import Link from "next/link";
-import { Search, MapPin, Loader2 } from "lucide-react";
+import { MapPin, Loader2 } from "lucide-react";
 
 // --- IMPORT KOMPONEN ---
 import BottomNavBar from "./components/Header";
 import EventCountdown from "./components/Countdown";
 import ProfileDropdown from "./components/ProfileDropdown";
+import SearchBox from "./components/SearchBox";
 
 // --- IMPORT SWIPER ---
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -101,13 +102,8 @@ export default function HomePage() {
               <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/10"></div>
               
                <div className="absolute top-0 left-0 right-0 flex justify-center pt-12 md:pt-32 px-4 z-20">
-                <div className="relative w-full max-w-2xl">
-                  <Link href="/search" className="block w-full">
-                    <div className="w-full rounded-full bg-white/95 backdrop-blur-sm py-4 px-6 pl-14 text-sm md:text-base shadow-2xl text-gray-500 cursor-pointer hover:bg-white transition-colors">
-                      Cari pantai, coto, atau event musik...
-                    </div>
-                  </Link>
-                  <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-6 w-6 text-gray-400" />
+                <div className="w-full max-w-2xl">
+                  <SearchBox />
                 </div>
               </div>
         </div>
@@ -213,7 +209,7 @@ export default function HomePage() {
             ) : (
               <div className="flex flex-col space-y-6">
                 {jappaNowItems.map((item) => (
-                  <Link href={`/jappa/${item.id}`} key={item.id} className="flex items-start gap-4 group cursor-pointer bg-white p-3 rounded-2xl hover:shadow-md transition-shadow md:bg-transparent md:p-0 md:hover:shadow-none">
+                  <Link href={`/jappanow/${item.id}`} key={item.id} className="flex items-start gap-4 group cursor-pointer bg-white p-3 rounded-2xl hover:shadow-md transition-shadow md:bg-transparent md:p-0 md:hover:shadow-none">
                     <div className="relative w-32 h-24 md:w-52 md:h-36 bg-gray-200 rounded-2xl overflow-hidden flex-shrink-0 shadow-sm">
                       {item.image && <Image src={item.image} alt={item.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />}
                     </div>

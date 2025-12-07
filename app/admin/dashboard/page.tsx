@@ -67,7 +67,7 @@ export default function AdminDashboardPage() {
 
   // Form State Jappa Now
   const [newJappa, setNewJappa] = useState({
-    title: '', description: '', content: ''
+    title: '', description: '', content: '', imageUrl: ''
   });
   const [jappaImageFile, setJappaImageFile] = useState<File | null>(null);
 
@@ -204,40 +204,34 @@ export default function AdminDashboardPage() {
   // --- HANDLER JAPPA NOW (BARU) ---
   const handleAddJappa = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!jappaImageFile) return alert("Gambar artikel wajib diupload!");
-    if (!newJappa.title || !newJappa.description) return alert("Judul dan Deskripsi wajib diisi!");
+    if (!newJappa.title.trim() || !newJappa.content.trim()) return alert("Judul dan konten artikel harus diisi!");
+    
+    if (newJappa.imageUrl && !newJappa.imageUrl.startsWith("http")) {
+      return alert("URL gambar tidak valid. Harus dimulai dengan http:// atau https://");
+    }
     
     setIsSubmitting(true);
     setUploadProgress(10);
 
     try {
-        console.log("Starting jappa upload...", { fileName: jappaImageFile.name, title: newJappa.title });
+        console.log("Saving jappa article to Firestore...", { title: newJappa.title });
         
-        // 1. Upload Gambar ke Cloudinary
-        const compressed = await compressImage(jappaImageFile);
-        console.log("Image compressed, uploading to Cloudinary...");
-        
-        const imageUrl = await uploadToCloudinary(compressed, "jappajappa/jappa_now");
-        console.log("Jappa image uploaded to Cloudinary:", imageUrl);
-        setUploadProgress(50);
-
-        // 2. Simpan ke Firestore
-        console.log("Saving jappa article to Firestore...");
-        const contentArray = newJappa.content.split('\n').filter(line => line.trim() !== '');
-
+        // Simpan ke Firestore
         await addDoc(collection(db, "jappa_posts"), {
             title: newJappa.title,
             description: newJappa.description,
-            content: contentArray, 
-            image: imageUrl,
+            content: newJappa.content, 
+            image: newJappa.imageUrl || null,
+            category: "event",
             author: "Admin Jappa",
-            createdAt: serverTimestamp()
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
         });
 
         console.log("Jappa article saved successfully!");
         alert("Artikel Jappa Now berhasil dipublish!");
         setIsAddJappaModalOpen(false);
-        setNewJappa({ title: '', description: '', content: '' });
+        setNewJappa({ title: '', description: '', content: '', imageUrl: '' });
         setJappaImageFile(null);
         setUploadProgress(100);
     } catch (error: any) {
@@ -449,8 +443,9 @@ export default function AdminDashboardPage() {
                         <textarea required placeholder="Tulis artikel di sini. Gunakan Enter untuk paragraf baru..." className="w-full p-3 border border-gray-300 rounded-xl text-sm h-32 resize-none focus:ring-2 focus:ring-black outline-none" value={newJappa.content} onChange={e => setNewJappa({...newJappa, content: e.target.value})}></textarea>
                     </div>
                     <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-1">Foto Utama</label>
-                        <input type="file" required accept="image/*" className="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200" onChange={e => setJappaImageFile(e.target.files ? e.target.files[0] : null)} />
+                        <label className="block text-xs font-bold text-gray-700 mb-1">URL Foto Utama</label>
+                        <input type="url" placeholder="https://example.com/image.jpg" className="w-full p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-black outline-none" value={newJappa.imageUrl} onChange={e => setNewJappa({...newJappa, imageUrl: e.target.value})} />
+                        <p className="text-xs text-gray-500 mt-1">💡 Gunakan URL dari Cloudinary, Imgur, atau hosting lainnya</p>
                     </div>
 
                     <div className="pt-4 border-t border-gray-100 flex justify-end gap-3">
