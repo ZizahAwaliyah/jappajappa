@@ -1,19 +1,15 @@
 "use client";
 
-import { useState } from "react"; // Tambahkan useState
 import Image from "next/image";
 import Link from "next/link";
-import { Search, MapPin, Bell, User } from "lucide-react";
-
-// --- IMPORT KOMPONEN ---
+import { Search, MapPin } from "lucide-react"; // Bell dihapus
 import BottomNavBar from "./components/Header";
 import EventCountdown from "./components/Countdown";
-
-// --- IMPORT SWIPER ---
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Mousewheel } from 'swiper/modules'; 
 import 'swiper/css';
 import 'swiper/css/pagination';
+import ProfileDropdown from "./components/ProfileDropdown";
 
 // --- DATA DUMMY ---
 const upcomingEvents = [
@@ -53,11 +49,10 @@ const jappaNowItems = [
 ];
 
 export default function HomePage() {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State untuk dropdown
 
   return (
     <>
-      <main className="bg-gray-50 min-h-screen pb-24 md:pb-10" onClick={() => setIsDropdownOpen(false)}>
+      <main className="bg-gray-50 min-h-screen pb-24 md:pb-10">
         
         {/* === DESKTOP NAVBAR === */}
         <nav className="hidden md:flex items-center justify-between px-8 py-4 bg-white shadow-sm sticky top-0 z-50">
@@ -69,44 +64,10 @@ export default function HomePage() {
           </div>
           
           <div className="flex items-center space-x-4">
-            <Bell className="w-6 h-6 text-gray-600 cursor-pointer hover:text-blue-600" />
+            {/* Lonceng dihapus */}
             
             {/* --- PROFILE DROPDOWN --- */}
-            <div className="relative" onClick={(e) => e.stopPropagation()}>
-              <button 
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors focus:outline-none"
-              >
-                <User className="w-5 h-5 text-gray-600" />
-              </button>
-
-              {/* Menu Dropdown */}
-              {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-lg py-2 z-50 animate-in fade-in zoom-in-95 duration-200">
-                  <div className="px-4 py-2 border-b border-gray-100 mb-1">
-                    <p className="text-xs text-gray-500 font-medium">Akun Saya</p>
-                  </div>
-                  
-                  <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                    Profile
-                  </Link>
-
-                  {/* Menu Event Organizer Baru */}
-                  <Link href="/eo-register" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                    Event Organizer
-                  </Link>
-                  
-                  <div className="border-t border-gray-100 my-1"></div>
-                  
-                  <Link href="/login" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                    Login
-                  </Link>
-                  <Link href="/signup" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                    Sign Up
-                  </Link>
-                </div>
-              )}
-            </div>
+            <ProfileDropdown />
           </div>
         </nav>
 
@@ -121,7 +82,6 @@ export default function HomePage() {
               />
               <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/10"></div>
               
-              {/* Search Bar Container */}
                <div className="absolute top-0 left-0 right-0 flex justify-center pt-12 md:pt-32 px-4 z-20">
                 <div className="relative w-full max-w-2xl">
                   <Link href="/search" className="block w-full">
@@ -137,10 +97,9 @@ export default function HomePage() {
         {/* === KONTEN UTAMA === */}
         <div className="max-w-screen-xl mx-auto px-4 md:px-8 relative z-30">
           
-          {/* === CARD EVENT DENGAN SWIPER === */}
+          {/* === CARD EVENT === */}
           <div className="-mt-32 md:-mt-24 mb-12">
             <div className="bg-white rounded-3xl shadow-xl p-5 md:p-8 relative">
-              
               <div className="flex justify-between items-center mb-4">
                 <Link href="/event" className="hover:underline">
                   <h2 className="text-lg md:text-2xl font-bold text-gray-900">Event akan Datang</h2>
@@ -187,11 +146,10 @@ export default function HomePage() {
                   </SwiperSlide>
                 ))}
               </Swiper>
-
             </div>
           </div>
 
-          {/* === TOP PICKS (Wisata) === */}
+          {/* === TOP PICKS === */}
           <section className="mb-12">
             <div className="flex justify-between items-center mb-4">
                <h2 className="text-lg md:text-2xl font-bold text-gray-900">Top Picks of the Month</h2>
@@ -229,17 +187,11 @@ export default function HomePage() {
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-lg md:text-2xl font-bold text-gray-900">Jappa Now</h2>
             </div>
-            
             <div className="flex flex-col space-y-6">
               {jappaNowItems.map((item) => (
-                <Link href={`/jappanow/${item.id}`} key={item.id} className="flex items-start gap-4 group cursor-pointer bg-white p-3 rounded-2xl hover:shadow-md transition-shadow md:bg-transparent md:p-0 md:hover:shadow-none">
+                <Link href={`/jappa/${item.id}`} key={item.id} className="flex items-start gap-4 group cursor-pointer bg-white p-3 rounded-2xl hover:shadow-md transition-shadow md:bg-transparent md:p-0 md:hover:shadow-none">
                   <div className="relative w-32 h-24 md:w-52 md:h-36 bg-gray-200 rounded-2xl overflow-hidden flex-shrink-0 shadow-sm">
-                     <Image
-                       src={item.image}
-                       alt={item.title}
-                       fill
-                       className="object-cover group-hover:scale-105 transition-transform duration-500"
-                     />
+                     <Image src={item.image} alt={item.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                   </div>
                   <div className="flex-1 py-1">
                     <h3 className="font-bold text-gray-900 text-base md:text-xl mb-2 group-hover:text-blue-600 transition-colors">

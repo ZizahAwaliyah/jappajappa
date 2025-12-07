@@ -1,9 +1,10 @@
 // app/profile/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link"; // Import Link untuk navigasi
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   Camera,
   Edit,
@@ -14,6 +15,7 @@ import {
   ChevronLeft // Import ChevronLeft untuk tombol Back
 } from "lucide-react";
 import BottomNavBar from "../components/Header"; // Pastikan path import benar
+import { useAuth } from "../context/AuthContext";
 
 // --- Data Awal ---
 const initialUser = {
@@ -95,9 +97,34 @@ function EditableField({
 }
 
 export default function ProfilePage() {
+  const router = useRouter();
+  const { user, isAuthenticated, logout } = useAuth();
   const [currentUser, setCurrentUser] = useState(initialUser);
   const [formData, setFormData] = useState(initialUser);
   const [editingField, setEditingField] = useState<string | null>(null);
+
+  // Redirect ke login jika belum login
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/login");
+    } else if (user) {
+      // Update currentUser dengan data dari auth
+      setCurrentUser({
+        profilePicture: user.profilePicture,
+        name: user.name,
+        displayName: user.displayName,
+        phoneNumber: user.phoneNumber,
+        email: user.email,
+      });
+      setFormData({
+        profilePicture: user.profilePicture,
+        name: user.name,
+        displayName: user.displayName,
+        phoneNumber: user.phoneNumber,
+        email: user.email,
+      });
+    }
+  }, [isAuthenticated, user, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -140,7 +167,10 @@ export default function ProfilePage() {
             </div>
 
             {/* Bagian Kanan: Tombol Logout */}
-            <button className="flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-bold hover:bg-gray-300 transition-colors shadow-sm">
+            <button
+              onClick={logout}
+              className="flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-bold hover:bg-gray-300 transition-colors shadow-sm"
+            >
               <LogOut className="w-4 h-4 mr-2" />
               Log out
             </button>

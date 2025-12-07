@@ -1,15 +1,31 @@
 // app/components/WishlistButton.tsx
 "use client";
 
-import { useState } from "react";
 import { Heart } from "lucide-react";
+import { useWishlist, WishlistItem } from "../context/WishlistContext";
+import { useAuth } from "../context/AuthContext";
 
-export default function WishlistButton() {
-  const [isWishlisted, setIsWishlisted] = useState(false);
+interface WishlistButtonProps {
+  item?: WishlistItem;
+}
+
+export default function WishlistButton({ item }: WishlistButtonProps) {
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { requireAuth } = useAuth();
+  const isWishlisted = item ? isInWishlist(item.id) : false;
 
   const toggleWishlist = () => {
-    setIsWishlisted(!isWishlisted);
-    // Di sini nanti bisa tambah logika simpan ke database
+    if (!item) return;
+
+    // Cek auth dulu sebelum add/remove wishlist
+    requireAuth(() => {
+      if (isWishlisted) {
+        removeFromWishlist(item.id);
+      } else {
+        addToWishlist(item);
+      }
+    });
+    // Jika tidak authenticated, requireAuth akan redirect ke login
   };
 
   return (
