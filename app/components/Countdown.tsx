@@ -49,16 +49,16 @@ export default function EventCountdown({ targetDate }: CountdownProps) {
   // Jika waktu habis
   if (timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.minutes === 0 && timeLeft.seconds === 0) {
     return (
-      <div className="bg-red-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-1 rounded-full flex items-center">
-        Live Now!
+      <div className="bg-linear-to-r from-red-500 to-pink-600 backdrop-blur-sm text-white text-[10px] font-bold px-3 py-1.5 rounded-full flex items-center shadow-lg shadow-red-500/50">
+        🔴 Live Now!
       </div>
     );
   }
 
   // Tampilan Countdown
   return (
-    <div className="bg-black/60 backdrop-blur-md text-white text-[10px] md:text-xs font-medium px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm border border-white/10">
-      <Clock className="w-3 h-3 text-yellow-400" />
+    <div className="bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 backdrop-blur-md text-white text-[10px] md:text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-lg shadow-purple-600/50 border border-white/20">
+      <Clock className="w-3.5 h-3.5 text-cyan-300 animate-pulse" />
       <span>
         {timeLeft.days > 0 && `${timeLeft.days}h `}
         {timeLeft.hours}j {timeLeft.minutes}m {timeLeft.seconds}d
