@@ -14,7 +14,7 @@ export default function EOProfilePage() {
 
   return (
     <main className="bg-gray-50 min-h-screen pb-10">
-      <div className="max-w-screen-md mx-auto">
+      <div className="max-w-3xl mx-auto">
         <header className="flex items-center justify-between p-4 bg-white sticky top-0 z-50 shadow-sm">
            <div className="flex items-center gap-2">
               <Link href="/" className="p-2 -ml-2 rounded-full hover:bg-gray-100"><ChevronLeft className="w-6 h-6" /></Link>

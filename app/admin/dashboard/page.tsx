@@ -390,7 +390,7 @@ export default function AdminDashboardPage() {
 
       {/* === MODAL TAMBAH WISATA === */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-amber-200">
                 <div className="flex justify-between items-center p-6 border-b-2 border-amber-100 sticky top-0 bg-linear-to-r from-amber-50 to-orange-50 z-10">
                     <h3 className="text-xl font-bold bg-linear-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">Tambah Wisata Baru</h3>
@@ -423,7 +423,7 @@ export default function AdminDashboardPage() {
 
       {/* === MODAL TAMBAH JAPPA NOW (BARU) === */}
       {isAddJappaModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 border-2 border-sky-200">
                 <div className="flex justify-between items-center p-6 border-b-2 border-sky-100 bg-linear-to-r from-sky-50 to-blue-50">
                     <h3 className="text-xl font-bold bg-linear-to-r from-sky-600 to-blue-600 bg-clip-text text-transparent">Tambah Artikel Jappa Now</h3>

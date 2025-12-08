@@ -345,7 +345,7 @@ export default function AdminDashboardPage() {
 
       {/* === MODAL TAMBAH WISATA === */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center p-6 border-b border-gray-100 sticky top-0 bg-white z-10">
                     <h3 className="text-xl font-bold text-gray-900">Tambah Wisata Baru</h3>
@@ -385,7 +385,7 @@ export default function AdminDashboardPage() {
 
       {/* === MODAL TAMBAH JAPPA NOW === */}
       {isAddJappaModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95">
                 <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-white">
                     <h3 className="text-xl font-bold text-gray-900">Tambah Artikel Jappa Now</h3>

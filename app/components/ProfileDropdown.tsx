@@ -87,7 +87,7 @@ export default function ProfileDropdown() {
 
       {/* DROPDOWN */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-60 bg-white border border-gray-100 rounded-xl shadow-xl py-2 z-[9999] animate-in fade-in zoom-in-95 duration-100 origin-top-right">
+        <div className="absolute right-0 mt-2 w-60 bg-white border border-gray-100 rounded-xl shadow-xl py-2 z-9999 animate-in fade-in zoom-in-95 duration-100 origin-top-right">
 
           {/* ===================== */}
           {/*      SUDAH LOGIN      */}
@@ -143,7 +143,7 @@ export default function ProfileDropdown() {
                     <User className="w-4 h-4 mr-3 opacity-70" /> Account
                   </Link>
                   <Link href="/myticket" className="flex items-center px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-50" onClick={() => setIsOpen(false)}>
-                    <Ticket className="w-4 h-4 h-4 mr-3 opacity-70" /> Tiket Saya
+                    <Ticket className="w-4 h-4 mr-3 opacity-70" /> Tiket Saya
                   </Link>
                 </div>
               )}
