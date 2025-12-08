@@ -256,7 +256,7 @@ const EventCard = ({ event }: { event: EventData }) => {
       </div>
 
       {/* Konten Card */}
-      <div className="p-4 flex flex-col flex-grow">
+      <div className="p-4 flex flex-col grow">
         <h3 className="font-bold text-gray-900 mb-1 line-clamp-2 text-base group-hover:text-orange-600 transition-colors">
           {event.title}
         </h3>
@@ -267,7 +267,7 @@ const EventCard = ({ event }: { event: EventData }) => {
           </p>
         )}
 
-        <div className="flex-grow"></div>
+        <div className="grow"></div>
 
         {/* Footer Info */}
         <div className="space-y-2">

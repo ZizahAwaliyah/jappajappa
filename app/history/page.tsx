@@ -75,7 +75,7 @@ export default function HistoryPage() {
                 {/* Bagian Atas: Gambar & Info Dasar */}
                 <div className="flex gap-4 mb-4">
                   {/* Gambar Thumbnail */}
-                  <div className="relative w-20 h-20 bg-gray-200 rounded-xl overflow-hidden flex-shrink-0">
+                  <div className="relative w-20 h-20 bg-gray-200 rounded-xl overflow-hidden shrink-0">
                     <Image
                       src={item.image}
                       alt={item.title}

@@ -13,7 +13,7 @@ export default function Footer() {
           
           {/* KOLOM 1: BRAND & SOCIALS */}
           <div className="lg:col-span-1">
-            <h2 className="text-2xl font-bold text-blue-700 mb-4">Jappa.</h2>
+            <h2 className="text-lg md:text-2xl font-bold bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-4">Jappa.</h2>
             <p className="text-sm leading-relaxed mb-6 text-gray-500">
               Kami menyediakan informasi event dan wisata terbaik di Sulawesi Selatan untuk pengalaman liburan tak terlupakan.
             </p>

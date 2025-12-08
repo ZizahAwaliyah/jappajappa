@@ -199,7 +199,7 @@ export default function WisataDetailPage() {
               <h3 className="text-sm font-medium text-gray-900 mb-6 border-b border-gray-100 pb-4">Bagikan</h3>
               <div className="flex justify-around items-center px-4">
                 <button className="flex flex-col items-center group"><div className="w-12 h-12 bg-[#25D366] rounded-full flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform"><MessageCircle className="w-7 h-7" /></div><span className="text-[10px] text-gray-600 mt-2 font-medium">WhatsApp</span></button>
-                <button className="flex flex-col items-center group"><div className="w-12 h-12 rounded-full flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-500"><Instagram className="w-7 h-7" /></div><span className="text-[10px] text-gray-600 mt-2 font-medium">Instagram</span></button>
+                <button className="flex flex-col items-center group"><div className="w-12 h-12 rounded-full flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform bg-linear-to-tr from-yellow-400 via-red-500 to-purple-500"><Instagram className="w-7 h-7" /></div><span className="text-[10px] text-gray-600 mt-2 font-medium">Instagram</span></button>
                 <button className="flex flex-col items-center group"><div className="w-12 h-12 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-700 shadow-md group-hover:bg-gray-50 transition-colors"><LinkIcon className="w-6 h-6" /></div><span className="text-[10px] text-gray-600 mt-2 font-medium">Copy Link</span></button>
               </div>
             </div>

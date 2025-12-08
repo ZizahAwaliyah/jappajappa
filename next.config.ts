@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'res.cloudinary.com',
       },
-      // Promediate
+      // Promedia Teknologi
       {
         protocol: 'https',
         hostname: 'static.promediateknologi.id',

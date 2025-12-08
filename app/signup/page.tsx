@@ -185,9 +185,9 @@ export default function SignUpPage() {
 
         {/* --- Separator --- */}
         <div className="flex items-center my-6">
-          <hr className="flex-grow border-gray-300" />
+          <hr className="grow border-gray-300" />
           <span className="mx-4 text-sm font-medium text-gray-500">atau</span>
-          <hr className="flex-grow border-gray-300" />
+          <hr className="grow border-gray-300" />
         </div>
 
         {/* --- Form Sign Up --- */}
