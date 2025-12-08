@@ -62,7 +62,7 @@ function EditableField({
             name={fieldName}
             value={value}
             onChange={onChange}
-            className="flex-grow w-full py-2 px-3 rounded-md border border-gray-300 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+            className="grow w-full py-2 px-3 rounded-md border border-gray-300 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
           />
           <div className="flex space-x-2 mt-2 sm:mt-0">
             <button
@@ -256,7 +256,7 @@ export default function ProfilePage() {
                 fill
                 className="object-cover rounded-2xl opacity-70"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+              <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent"></div>
             </div>
 
             <div className="relative z-10 flex flex-col items-center justify-center h-48 text-white">

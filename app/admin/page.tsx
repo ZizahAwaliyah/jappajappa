@@ -214,32 +214,32 @@ export default function AdminDashboardPage() {
   const handleApproveEvent = async (id: string) => { if (confirm("Publish Event?")) await updateDoc(doc(db, "events", id), { status: "actual" }); };
   const handleDeclineEvent = async (id: string) => { if (confirm("Reject Event?")) await updateDoc(doc(db, "events", id), { status: "rejected" }); };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-gray-400" /></div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-emerald-50 via-sky-50 to-amber-50"><Loader2 className="animate-spin text-emerald-600 w-12 h-12" /></div>;
 
   return (
-    <div className="min-h-screen bg-white font-sans text-gray-900">
-      
+    <div className="min-h-screen bg-linear-to-br from-emerald-50 via-sky-50 to-amber-50 font-sans text-gray-900">
+
       {/* NAVBAR */}
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-gray-100 bg-white sticky top-0 z-50">
+      <nav className="flex items-center justify-between px-8 py-5 bg-linear-to-r from-emerald-600 to-teal-600 shadow-lg sticky top-0 z-50">
         <div className="flex items-center gap-12">
-          <h1 className="text-2xl font-bold text-red-600 tracking-tight">Jappa.</h1>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Jappa.</h1>
           <div className="hidden md:flex gap-8 text-sm font-bold">
             {['Wisata', 'Jappa Now', 'Waiting For Approve', 'EO'].map((menu) => (
-              <button key={menu} onClick={() => setActiveTab(menu as any)} className={`transition-colors relative ${activeTab === menu ? "text-black" : "text-gray-400 hover:text-gray-600"}`}>
+              <button key={menu} onClick={() => setActiveTab(menu as any)} className={`transition-all relative ${activeTab === menu ? "text-white border-b-2 border-white pb-1" : "text-white/70 hover:text-white"}`}>
                 {menu}
-                {menu === 'Waiting For Approve' && pendingEvents.length > 0 && <span className="absolute -top-1 -right-2 h-2 w-2 bg-red-500 rounded-full"></span>}
-                {menu === 'EO' && pendingUsers.length > 0 && <span className="absolute -top-1 -right-2 h-2 w-2 bg-red-500 rounded-full"></span>}
+                {menu === 'Waiting For Approve' && pendingEvents.length > 0 && <span className="absolute -top-1 -right-2 h-2 w-2 bg-rose-500 rounded-full animate-pulse"></span>}
+                {menu === 'EO' && pendingUsers.length > 0 && <span className="absolute -top-1 -right-2 h-2 w-2 bg-rose-500 rounded-full animate-pulse"></span>}
               </button>
             ))}
           </div>
         </div>
-        
+
         <div className="flex items-center gap-6">
           <div className="relative w-64 hidden lg:block">
-            <input type="text" placeholder="Cari..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full py-2 px-4 pr-10 rounded-full border border-gray-300 text-xs focus:outline-none focus:border-gray-400 text-gray-600"/>
-            <SearchIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input type="text" placeholder="Cari..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full py-2 px-4 pr-10 rounded-full border-2 border-white/30 bg-white/95 backdrop-blur-sm text-xs focus:outline-none focus:border-white text-gray-800 shadow-md"/>
+            <SearchIcon className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500 w-4 h-4" />
           </div>
-          <button className="text-gray-600 hover:bg-gray-100 p-2 rounded-full transition-colors"><FilterIcon className="w-5 h-5" /></button>
+          <button className="text-white/90 hover:bg-white/20 p-2 rounded-full transition-colors"><FilterIcon className="w-5 h-5" /></button>
           <ProfileDropdown />
         </div>
       </nav>
@@ -247,16 +247,16 @@ export default function AdminDashboardPage() {
       {/* UTAMA */}
       <div className="max-w-screen-2xl mx-auto px-8 py-8">
         <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-medium text-blue-500">{activeTab === 'Waiting For Approve' ? 'Event Approval' : activeTab} List</h2>
-            
+            <h2 className="text-lg font-bold bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">{activeTab === 'Waiting For Approve' ? 'Event Approval' : activeTab} List</h2>
+
             {/* Tombol Action Sesuai Tab */}
             {activeTab === 'Wisata' && (
-                <button onClick={() => setIsAddModalOpen(true)} className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-full text-sm font-bold hover:bg-gray-800 transition-colors shadow-lg">
+                <button onClick={() => setIsAddModalOpen(true)} className="flex items-center gap-2 bg-linear-to-r from-amber-500 to-orange-500 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg shadow-amber-200">
                     <PlusIcon className="w-4 h-4" /> Tambah Wisata
                 </button>
             )}
             {activeTab === 'Jappa Now' && (
-                <button onClick={() => setIsAddJappaModalOpen(true)} className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-full text-sm font-bold hover:bg-gray-800 transition-colors shadow-lg">
+                <button onClick={() => setIsAddJappaModalOpen(true)} className="flex items-center gap-2 bg-linear-to-r from-sky-500 to-blue-500 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:from-sky-600 hover:to-blue-600 transition-all shadow-lg shadow-sky-200">
                     <PlusIcon className="w-4 h-4" /> Tambah Artikel
                 </button>
             )}
@@ -266,14 +266,14 @@ export default function AdminDashboardPage() {
         {activeTab === 'Wisata' && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
              {wisataList.map((item) => (
-                <div key={item.id} className="group bg-white border border-gray-200 rounded-xl p-3 shadow-sm hover:shadow-md transition-all h-full flex flex-col">
-                    <div className="relative h-48 w-full bg-gray-50 rounded-lg overflow-hidden mb-4 border border-gray-100">
-                        {item.image ? <img src={item.image} alt={item.title} className="w-full h-full object-cover" /> : <div className="bg-gray-200 h-full w-full"></div>}
+                <div key={item.id} className="group bg-white/95 backdrop-blur-sm border-2 border-amber-100 rounded-2xl p-4 shadow-lg hover:shadow-2xl hover:border-amber-300 transition-all h-full flex flex-col">
+                    <div className="relative h-48 w-full bg-linear-to-br from-amber-100 to-orange-100 rounded-xl overflow-hidden mb-4 border-2 border-amber-200 group-hover:border-amber-300 transition-all">
+                        {item.image ? <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" /> : <div className="bg-linear-to-br from-amber-200 to-orange-200 h-full w-full"></div>}
                     </div>
-                    <h3 className="text-sm font-medium text-gray-900 mb-6 px-1 line-clamp-2 flex-grow">{item.title}</h3>
-                    <div className="flex justify-between items-end px-1 mt-auto">
-                        <span className="text-[10px] text-gray-500 font-medium truncate max-w-[50%]">{item.location}</span>
-                        <span className="text-[10px] text-black font-bold">{item.category}</span>
+                    <h3 className="text-sm font-bold text-gray-900 group-hover:text-amber-600 mb-6 px-1 line-clamp-2 grow transition-colors">{item.title}</h3>
+                    <div className="flex justify-between items-end px-1 mt-auto border-t-2 border-amber-100 pt-3">
+                        <span className="text-[10px] text-gray-600 font-medium truncate max-w-[50%]">{item.location}</span>
+                        <span className="text-[10px] bg-amber-100 text-amber-700 font-bold px-2 py-1 rounded-full">{item.category}</span>
                     </div>
                 </div>
              ))}
@@ -284,16 +284,16 @@ export default function AdminDashboardPage() {
         {activeTab === 'Jappa Now' && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
              {jappaList.length === 0 ? (
-                <div className="col-span-full text-center py-20 text-gray-300">Belum ada artikel Jappa Now.</div>
+                <div className="col-span-full text-center py-20 text-gray-400 bg-white/50 rounded-2xl">Belum ada artikel Jappa Now.</div>
              ) : jappaList.map((item) => (
-                <div key={item.id} className="group bg-white border border-gray-200 rounded-xl p-3 shadow-sm hover:shadow-md transition-all h-full flex flex-col">
-                    <div className="relative h-48 w-full bg-gray-50 rounded-lg overflow-hidden mb-4 border border-gray-100">
-                        {item.image ? <img src={item.image} alt={item.title} className="w-full h-full object-cover" /> : <div className="bg-gray-200 h-full w-full"></div>}
+                <div key={item.id} className="group bg-white/95 backdrop-blur-sm border-2 border-sky-100 rounded-2xl p-4 shadow-lg hover:shadow-2xl hover:border-sky-300 transition-all h-full flex flex-col">
+                    <div className="relative h-48 w-full bg-linear-to-br from-sky-100 to-blue-100 rounded-xl overflow-hidden mb-4 border-2 border-sky-200 group-hover:border-sky-300 transition-all">
+                        {item.image ? <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" /> : <div className="bg-linear-to-br from-sky-200 to-blue-200 h-full w-full"></div>}
                     </div>
-                    <h3 className="text-sm font-medium text-gray-900 mb-2 px-1 line-clamp-2">{item.title}</h3>
-                    <p className="text-xs text-gray-500 px-1 line-clamp-3 mb-4 flex-grow">{item.description}</p>
-                    <div className="flex justify-between items-end px-1 mt-auto pt-2 border-t border-gray-50">
-                        <span className="text-[10px] text-gray-400 font-medium">By {item.author || 'Admin'}</span>
+                    <h3 className="text-sm font-bold text-gray-900 group-hover:text-sky-600 mb-2 px-1 line-clamp-2 transition-colors">{item.title}</h3>
+                    <p className="text-xs text-gray-600 px-1 line-clamp-3 mb-4 grow">{item.description}</p>
+                    <div className="flex justify-between items-end px-1 mt-auto pt-2 border-t-2 border-sky-100">
+                        <span className="text-[10px] bg-sky-100 text-sky-700 px-2 py-1 rounded-full font-bold">By {item.author || 'Admin'}</span>
                     </div>
                 </div>
              ))}
@@ -304,18 +304,18 @@ export default function AdminDashboardPage() {
         {activeTab === 'Waiting For Approve' && (
              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {pendingEvents.map((item) => (
-                    <div key={item.id} className="group bg-white border border-gray-200 rounded-xl p-3 shadow-sm hover:shadow-md transition-all cursor-pointer h-full flex flex-col">
-                        <div className="relative h-48 w-full bg-gray-50 rounded-lg overflow-hidden mb-4 border border-gray-100">
-                             {item.image && <img src={item.image} className="w-full h-full object-cover relative z-10"/>}
-                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 z-20 backdrop-blur-[2px]">
-                                <button onClick={(e) => {e.stopPropagation(); handleApproveEvent(item.id)}} className="bg-white text-black text-xs font-bold px-4 py-2 rounded-full">Approve</button>
-                                <button onClick={(e) => {e.stopPropagation(); handleDeclineEvent(item.id)}} className="bg-white/20 border border-white text-white text-xs font-bold px-4 py-2 rounded-full">Reject</button>
+                    <div key={item.id} className="group bg-white/95 backdrop-blur-sm border-2 border-emerald-100 rounded-2xl p-4 shadow-lg hover:shadow-2xl hover:border-emerald-300 transition-all cursor-pointer h-full flex flex-col">
+                        <div className="relative h-48 w-full bg-linear-to-br from-emerald-100 to-teal-100 rounded-xl overflow-hidden mb-4 border-2 border-emerald-200">
+                             {item.image && <img src={item.image} className="w-full h-full object-cover relative z-10 group-hover:scale-105 transition-transform duration-500"/>}
+                             <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-3 z-20 backdrop-blur-sm">
+                                <button onClick={(e) => {e.stopPropagation(); handleApproveEvent(item.id)}} className="bg-linear-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold px-5 py-2.5 rounded-full shadow-lg hover:from-emerald-600 hover:to-teal-600 transition-all">Approve</button>
+                                <button onClick={(e) => {e.stopPropagation(); handleDeclineEvent(item.id)}} className="bg-white/20 border-2 border-white text-white text-xs font-bold px-5 py-2.5 rounded-full backdrop-blur-sm hover:bg-white/30 transition-all">Reject</button>
                              </div>
                         </div>
-                        <h3 className="text-sm font-medium text-gray-900 mb-6 px-1">{item.title}</h3>
-                         <div className="flex justify-between items-end px-1 mt-auto">
-                            <span className="text-[10px] text-gray-500 font-medium truncate max-w-[50%]">{item.location || "Makassar"}</span>
-                             <span className="text-[10px] font-bold text-gray-900">Harga mulai {item.price}</span>
+                        <h3 className="text-sm font-bold text-gray-900 group-hover:text-emerald-600 mb-6 px-1 transition-colors line-clamp-2">{item.title}</h3>
+                         <div className="flex justify-between items-end px-1 mt-auto border-t-2 border-emerald-100 pt-3">
+                            <span className="text-[10px] text-gray-600 font-medium truncate max-w-[50%]">{item.location || "Makassar"}</span>
+                             <span className="text-[10px] font-bold bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Rp {item.price.toLocaleString('id-ID')}</span>
                         </div>
                     </div>
                 ))}
@@ -324,16 +324,16 @@ export default function AdminDashboardPage() {
         
         {/* 4. CONTENT EO */}
         {activeTab === 'EO' && (
-             <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+             <div className="bg-white/95 backdrop-blur-sm rounded-2xl border-2 border-violet-100 overflow-hidden shadow-lg">
                 <table className="w-full text-left">
-                    <thead className="bg-gray-50 border-b border-gray-100"><tr><th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Nama EO</th><th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Email / Kontak</th><th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Info Legalitas</th><th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase text-right">Aksi</th></tr></thead>
-                    <tbody className="divide-y divide-gray-50">
+                    <thead className="bg-linear-to-r from-violet-50 to-purple-50 border-b-2 border-violet-100"><tr><th className="px-6 py-4 text-xs font-bold text-violet-700 uppercase">Nama EO</th><th className="px-6 py-4 text-xs font-bold text-violet-700 uppercase">Email / Kontak</th><th className="px-6 py-4 text-xs font-bold text-violet-700 uppercase">Info Legalitas</th><th className="px-6 py-4 text-xs font-bold text-violet-700 uppercase text-right">Aksi</th></tr></thead>
+                    <tbody className="divide-y divide-violet-50">
                         {pendingUsers.map((user) => (
-                            <tr key={user.id} className="hover:bg-gray-50/50">
-                                <td className="px-6 py-4"><div className="flex items-center gap-3"><div className="h-10 w-10 rounded-full bg-gray-200 overflow-hidden flex-shrink-0 border border-gray-200">{user.imageUrl ? (<img src={user.imageUrl} alt="" className="h-full w-full object-cover" />) : (<UserIcon className="m-auto mt-2 text-gray-400" />)}</div><span className="text-sm font-bold text-gray-900">{user.name}</span></div></td>
-                                <td className="px-6 py-4"><div className="flex flex-col"><span className="text-sm text-gray-600">{user.email}</span>{user.phone && <span className="text-xs text-gray-400 mt-0.5">{user.phone}</span>}</div></td>
-                                <td className="px-6 py-4"><div className="flex flex-col gap-1"><span className="text-xs font-mono text-gray-500 bg-gray-100 px-2 py-1 rounded w-fit">KTP: {user.ktp}</span>{user.portfolio && (<a href={user.portfolio} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-blue-600 hover:underline mt-1"><ExternalLink className="w-3 h-3" />Lihat Portofolio</a>)}</div></td>
-                                <td className="px-6 py-4 text-right"><div className="flex justify-end gap-3 items-center"><button onClick={() => handleDeclineUser(user.id)} className="text-xs font-medium text-red-500 hover:text-red-700 hover:underline">Tolak</button><button onClick={() => handleApproveUser(user.id)} className="text-xs bg-black text-white px-4 py-2 rounded-full font-bold hover:bg-gray-800 transition-shadow shadow-sm">Setujui</button></div></td>
+                            <tr key={user.id} className="hover:bg-violet-50/50 transition-colors">
+                                <td className="px-6 py-4"><div className="flex items-center gap-3"><div className="h-10 w-10 rounded-full bg-linear-to-br from-violet-100 to-purple-100 overflow-hidden shrink-0 border-2 border-violet-200">{user.imageUrl ? (<img src={user.imageUrl} alt="" className="h-full w-full object-cover" />) : (<UserIcon className="m-auto mt-2 text-violet-400" />)}</div><span className="text-sm font-bold text-gray-900">{user.name}</span></div></td>
+                                <td className="px-6 py-4"><div className="flex flex-col"><span className="text-sm text-gray-700">{user.email}</span>{user.phone && <span className="text-xs text-gray-500 mt-0.5">{user.phone}</span>}</div></td>
+                                <td className="px-6 py-4"><div className="flex flex-col gap-1"><span className="text-xs font-mono text-violet-700 bg-violet-100 px-2.5 py-1.5 rounded-lg w-fit font-bold">KTP: {user.ktp}</span>{user.portfolio && (<a href={user.portfolio} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-sky-600 hover:text-sky-700 hover:underline mt-1 font-medium"><ExternalLink className="w-3 h-3" />Lihat Portofolio</a>)}</div></td>
+                                <td className="px-6 py-4 text-right"><div className="flex justify-end gap-3 items-center"><button onClick={() => handleDeclineUser(user.id)} className="text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-4 py-2 rounded-full transition-all">Tolak</button><button onClick={() => handleApproveUser(user.id)} className="text-xs bg-linear-to-r from-emerald-500 to-teal-500 text-white px-5 py-2 rounded-full font-bold hover:from-emerald-600 hover:to-teal-600 transition-all shadow-md shadow-emerald-200">Setujui</button></div></td>
                             </tr>
                         ))}
                     </tbody>

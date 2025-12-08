@@ -79,7 +79,7 @@ export default function WishlistPage() {
                     className="flex gap-4 p-4"
                   >
                     {/* Gambar */}
-                    <div className="relative w-28 h-28 bg-gray-200 rounded-xl overflow-hidden flex-shrink-0">
+                    <div className="relative w-28 h-28 bg-gray-200 rounded-xl overflow-hidden shrink-0">
                       <Image
                         src={item.image ?? '/logo/apple.svg'}
                         alt={item.title}
