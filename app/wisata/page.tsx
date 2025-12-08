@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react"; // 1. Import Suspense
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -12,7 +12,7 @@ import ProfileDropdown from "../components/ProfileDropdown";
 import { db } from "@/lib/firebase"; 
 import { collection, query, onSnapshot } from "firebase/firestore";
 
-// Opsi Filter Statis (Bisa juga dibuat dinamis jika mau)
+// Opsi Filter Statis
 const cities = [
   "Semua Kota", 
   "Bantaeng", "Barru", "Bone", "Bulukumba", "Enrekang", "Gowa", 
@@ -30,7 +30,8 @@ const categories = [
   "Wisata Kota"
 ];
 
-export default function WisataPage() {
+// --- 2. KOMPONEN ISI (LOGIKA UTAMA PINDAH KE SINI) ---
+function WisataContent() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") || "";
 
@@ -43,9 +44,8 @@ export default function WisataPage() {
   const [selectedCategory, setSelectedCategory] = useState("Semua Kategori");
   const [searchQuery, setSearchQuery] = useState(initialQuery);
 
-  // 1. FETCH DATA REAL-TIME DARI FIREBASE
+  // FETCH DATA REAL-TIME DARI FIREBASE
   useEffect(() => {
-    // Query ke collection 'wisata'
     const q = query(collection(db, "wisata"));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -57,19 +57,18 @@ export default function WisataPage() {
         setLoading(false);
     });
 
-    // Cleanup listener saat component unmount
     return () => unsubscribe();
   }, []);
 
-  // 2. LOGIKA FILTER (Client-side filtering)
+  // LOGIKA FILTER
   const filteredData = wisataList.filter((item) => {
     // Filter Kategori
     const matchCategory = selectedCategory === "Semua Kategori" || item.category === selectedCategory;
     
-    // Filter Kota (Cek apakah string lokasi mengandung nama kota)
+    // Filter Kota
     const matchCity = selectedCity === "Semua Kota" || (item.location && item.location.toLowerCase().includes(selectedCity.toLowerCase()));
     
-    // Filter Pencarian (Judul atau Lokasi) - gunakan field `title` yang sebenarnya
+    // Filter Pencarian
     const matchSearch = !searchQuery || 
                        item.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
                        item.location?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -105,7 +104,7 @@ export default function WisataPage() {
            />
            <div className="absolute inset-0 bg-linear-to-b from-amber-900/60 via-transparent to-orange-900/40"></div>
 
-           <div className="absolute inset-0 flex flex-col justify-center px-6 md:px-16 max-w-screen-xl mx-auto w-full">
+           <div className="absolute inset-0 flex flex-col justify-center px-6 md:px-16 max-w-7xl mx-auto w-full">
               <h1 className="text-3xl md:text-5xl font-bold text-white drop-shadow-lg mb-6">
                 Destinasi Wisata
               </h1>
@@ -158,7 +157,7 @@ export default function WisataPage() {
         </div>
 
         {/* List Wisata */}
-        <div className="max-w-screen-xl mx-auto px-4 md:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
 
            {/* Loading State */}
            {loading ? (
@@ -231,5 +230,21 @@ export default function WisataPage() {
       </main>
       <BottomNavBar />
     </>
+  );
+}
+
+// --- 3. KOMPONEN UTAMA (WRAPPER SUSPENSE) ---
+// Ini yang diexport agar build Next.js sukses
+export default function WisataPage() {
+  return (
+    <Suspense 
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-emerald-50 via-sky-50 to-amber-50">
+           <Loader2 className="animate-spin text-amber-600 w-12 h-12" />
+        </div>
+      }
+    >
+      <WisataContent />
+    </Suspense>
   );
 }

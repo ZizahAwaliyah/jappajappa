@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react"; // Tambahkan Suspense
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -31,7 +31,8 @@ const months = [
   { label: "Desember", value: "12" },
 ];
 
-export default function EventPage() {
+// --- 1. KOMPONEN ISI (LOGIKA UTAMA DIPINDAHKAN KE SINI) ---
+function EventContent() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") || "";
   
@@ -43,9 +44,8 @@ export default function EventPage() {
   const [selectedMonth, setSelectedMonth] = useState("All"); 
   const [searchQuery, setSearchQuery] = useState(initialQuery);
 
-  // 1. FETCH DATA FIREBASE
+  // FETCH DATA FIREBASE
   useEffect(() => {
-    // Hanya ambil event yang statusnya 'Actual' (approved oleh admin)
     const q = query(collection(db, "events"), where("status", "==", "Actual"));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -56,24 +56,22 @@ export default function EventPage() {
     return () => unsubscribe();
   }, []);
 
-  // 2. LOGIKA FILTER
+  // LOGIKA FILTER
   const filteredData = eventsData.filter((event) => {
     // A. Filter Kategori
     const matchCategory = selectedCategory === "Semua Event" || event.category === selectedCategory;
     
-    // B. Filter Pencarian (Nama Event atau Lokasi) - gunakan field 'title' yang sebenarnya
+    // B. Filter Pencarian
     const matchSearch = !searchQuery || event.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
                         event.location?.toLowerCase().includes(searchQuery.toLowerCase());
     
     // C. Filter Bulan 
-    // Field date di database adalah format YYYY-MM-DD (misal: 2026-02-14)
-    // Bukan startDate, tapi 'date'
     let eventMonth = "";
     if (event.date) {
         const dateStr = typeof event.date === 'string' ? event.date : event.date;
         const parts = dateStr.split("-");
         if (parts.length > 1) {
-            eventMonth = parts[1]; // "02"
+            eventMonth = parts[1]; 
         }
     }
     const matchMonth = selectedMonth === "All" || eventMonth === selectedMonth;
@@ -109,7 +107,7 @@ export default function EventPage() {
           />
           <div className="absolute inset-0 bg-linear-to-b from-emerald-900/60 via-transparent to-teal-900/40"></div>
 
-          <div className="absolute inset-0 flex flex-col justify-center px-6 md:px-16 max-w-screen-xl mx-auto w-full">
+          <div className="absolute inset-0 flex flex-col justify-center px-6 md:px-16 max-w-7xl mx-auto w-full">
             <h1 className="text-4xl md:text-5xl font-bold text-white drop-shadow-lg mb-6">Event</h1>
 
             {/* CONTAINER FILTER & SEARCH */}
@@ -147,7 +145,7 @@ export default function EventPage() {
 
         {/* === CATEGORY TABS (Sticky) === */}
         <div className="bg-white/95 backdrop-blur-sm shadow-lg border-b-2 border-emerald-100 sticky top-0 md:top-[72px] z-40">
-          <div className="max-w-screen-xl mx-auto px-4 md:px-8">
+          <div className="max-w-7xl mx-auto px-4 md:px-8">
             <div className="flex space-x-6 overflow-x-auto scrollbar-hide py-4">
               {categories.map((category) => (
                 <button
@@ -167,7 +165,7 @@ export default function EventPage() {
         </div>
 
         {/* === LIST EVENT === */}
-        <div className="max-w-screen-xl mx-auto px-4 md:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-6">
 
           {loading ? (
              <div className="flex justify-center py-20">
@@ -228,5 +226,21 @@ export default function EventPage() {
       </main>
       <BottomNavBar />
     </>
+  );
+}
+
+// --- 2. KOMPONEN UTAMA (WRAPPER SUSPENSE) ---
+// Ini yang diexport agar build Next.js tidak error saat membaca URL params
+export default function EventPage() {
+  return (
+    <Suspense 
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-emerald-50 via-sky-50 to-amber-50">
+           <Loader2 className="animate-spin text-emerald-600 w-12 h-12" />
+        </div>
+      }
+    >
+      <EventContent />
+    </Suspense>
   );
 }

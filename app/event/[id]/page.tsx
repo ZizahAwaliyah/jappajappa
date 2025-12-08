@@ -127,7 +127,7 @@ export default function EventDetailPage() {
           </div>
         </header>
 
-        <div className="max-w-screen-xl mx-auto md:px-8 md:py-8">
+        <div className="max-w-7xl mx-auto md:px-8 md:py-8">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
             <div className="md:col-span-7 space-y-6">
               <div className="relative w-full h-64 md:h-[400px] bg-gray-200 md:rounded-2xl overflow-hidden">
@@ -227,7 +227,7 @@ export default function EventDetailPage() {
 
       {/* MODAL BELI */}
       {isBuyModalOpen && selectedTicket && (
-        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-100 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200">
             <div className="bg-white w-full sm:w-[400px] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
                 <div className="p-5 border-b border-gray-100 flex justify-between items-center"><h3 className="font-bold text-lg">Atur Jumlah Tiket</h3><button onClick={() => setIsBuyModalOpen(false)} className="p-1 hover:bg-gray-100 rounded-full"><X className="w-5 h-5" /></button></div>
                 <div className="p-6">

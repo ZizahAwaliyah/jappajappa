@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react"; // 1. Import Suspense
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -18,11 +18,12 @@ interface SearchResult {
   category?: string;
 }
 
-export default function SearchPage() {
+// --- 2. KOMPONEN ISI (LOGIKA SEARCH PINDAH KE SINI) ---
+function SearchContent() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams(); // Ini penyebab error, jadi harus di dalam komponen child
   const query = searchParams.get("q") || "";
 
   useEffect(() => {
@@ -201,5 +202,24 @@ export default function SearchPage() {
         )}
       </div>
     </div>
+  );
+}
+
+// --- 3. KOMPONEN UTAMA (WRAPPER SUSPENSE) ---
+// Ini yang diexport agar Next.js Build sukses
+export default function SearchPage() {
+  return (
+    <Suspense 
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+            <p className="text-gray-600">Initializing Search...</p>
+          </div>
+        </div>
+      }
+    >
+      <SearchContent />
+    </Suspense>
   );
 }
