@@ -6,8 +6,8 @@ import { getStorage } from "firebase/storage";
 const firebaseConfig = {
   apiKey: "AIzaSyCTxUxarVP6NsKT74FDyDFkC1irsb8Ny5Y",
   authDomain: "jappajappa-47796.firebaseapp.com",
-  projectId: "jappajappa-47796", // Typo 'y' di awal saya koreksi agar sesuai authDomain
-  storageBucket: "jappajappa-47796.firebasestorage.app",
+  projectId: "jappajappa-47796",
+  storageBucket: "jappajappa-47796.appspot.com", // Fixed: gunakan .appspot.com
   messagingSenderId: "551636996244",
   appId: "1:551636996244:web:6d3f99a81942036e932481",
   measurementId: "G-YTXMC8DM02"

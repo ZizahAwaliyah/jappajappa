@@ -30,6 +30,8 @@ export default function CreateEventPage() {
     time: "",
     location: "",
     gmapsLink: "",
+    latitude: "",
+    longitude: "",
     price: "",
     stock: "",
     description: "",
@@ -95,6 +97,8 @@ export default function CreateEventPage() {
             time: formData.time,
             location: formData.location,
             gmapsLink: formData.gmapsLink,
+            latitude: formData.latitude ? Number(formData.latitude) : null,
+            longitude: formData.longitude ? Number(formData.longitude) : null,
             price: Number(formData.price),
             stock: Number(formData.stock),
             description: formData.description,
@@ -207,11 +211,21 @@ export default function CreateEventPage() {
                             <input
                                 type="url"
                                 name="gmapsLink"
-                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none font-medium text-sm"
+                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none font-medium text-sm mb-3"
                                 placeholder="🔗 Paste Google Maps Link (opsional)"
                                 onChange={handleChange}
                             />
-                            <p className="text-xs text-gray-500 mt-2">💡 Cara: Buka Google Maps → Klik lokasi → Share → Copy link</p>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Latitude 📍</label>
+                                    <input type="number" step="any" name="latitude" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none font-medium text-sm" placeholder="Cth: -6.200000" onChange={handleChange} />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Longitude 📍</label>
+                                    <input type="number" step="any" name="longitude" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none font-medium text-sm" placeholder="Cth: 106.816666" onChange={handleChange} />
+                                </div>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-2">💡 <strong>Cara dapat koordinat:</strong> Buka Google Maps → Klik lokasi → Klik kanan → Salin koordinat</p>
                         </div>
 
                         {/* Waktu */}
