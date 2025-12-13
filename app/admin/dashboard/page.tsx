@@ -60,7 +60,7 @@ export default function AdminDashboardPage() {
 
   // Form State Wisata
   const [newWisata, setNewWisata] = useState({
-    title: '', location: '', category: 'Wisata Alam', gmapsLink: '', openHours: '', description1: '', description2: '',
+    title: '', location: '', category: 'Wisata Alam', gmapsLink: '', openHours: '', description1: '', description2: '', latitude: '', longitude: '',
   });
   const [mainImageFile, setMainImageFile] = useState<File | null>(null);
   const [galleryFiles, setGalleryFiles] = useState<FileList | null>(null);
@@ -178,20 +178,22 @@ export default function AdminDashboardPage() {
         }
 
         console.log("Saving wisata to Firestore...");
-        await addDoc(collection(db, "wisata"), { 
-            ...newWisata, 
-            image: mainImageUrl, 
-            mainImage: mainImageUrl, 
-            gallery: galleryUrls, 
-            isOpen: true, 
-            rating: 4.8, 
-            createdAt: serverTimestamp() 
+        await addDoc(collection(db, "wisata"), {
+            ...newWisata,
+            latitude: newWisata.latitude ? Number(newWisata.latitude) : null,
+            longitude: newWisata.longitude ? Number(newWisata.longitude) : null,
+            image: mainImageUrl,
+            mainImage: mainImageUrl,
+            gallery: galleryUrls,
+            isOpen: true,
+            rating: 4.8,
+            createdAt: serverTimestamp()
         });
         
         alert("✅ Wisata berhasil ditambahkan!");
         setIsAddModalOpen(false);
-        setNewWisata({ title: '', location: '', category: 'Wisata Alam', gmapsLink: '', openHours: '', description1: '', description2: '' });
-        setMainImageFile(null); 
+        setNewWisata({ title: '', location: '', category: 'Wisata Alam', gmapsLink: '', openHours: '', description1: '', description2: '', latitude: '', longitude: '' });
+        setMainImageFile(null);
         setGalleryFiles(null);
     } catch (error: any) { 
         console.error("Wisata upload error:", error);
@@ -406,6 +408,11 @@ export default function AdminDashboardPage() {
                         <div><label className="block text-xs font-bold text-amber-700 mb-1">Jam Operasional</label><input type="text" placeholder="Cth: 08:00 - 17:00 WITA" className="w-full p-2 border-2 border-amber-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500" value={newWisata.openHours} onChange={e => setNewWisata({...newWisata, openHours: e.target.value})} /></div>
                     </div>
                     <div><label className="block text-xs font-bold text-amber-700 mb-1">Link Google Maps</label><input type="url" placeholder="https://maps.app.goo.gl/..." className="w-full p-2 border-2 border-amber-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500" value={newWisata.gmapsLink} onChange={e => setNewWisata({...newWisata, gmapsLink: e.target.value})} /></div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div><label className="block text-xs font-bold text-amber-700 mb-1">Latitude 📍</label><input type="number" step="any" placeholder="Cth: -6.200000" className="w-full p-2 border-2 border-amber-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500" value={newWisata.latitude} onChange={e => setNewWisata({...newWisata, latitude: e.target.value})} /></div>
+                        <div><label className="block text-xs font-bold text-amber-700 mb-1">Longitude 📍</label><input type="number" step="any" placeholder="Cth: 106.816666" className="w-full p-2 border-2 border-amber-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500" value={newWisata.longitude} onChange={e => setNewWisata({...newWisata, longitude: e.target.value})} /></div>
+                    </div>
+                    <p className="text-xs text-amber-600 -mt-2">💡 <strong>Cara dapat koordinat:</strong> Buka Google Maps → Klik lokasi → Klik kanan → Salin koordinat</p>
                     <div><label className="block text-xs font-bold text-amber-700 mb-1">Deskripsi Singkat (Paragraf 1)</label><textarea required className="w-full p-2 border-2 border-amber-200 rounded-lg text-sm h-20 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500" value={newWisata.description1} onChange={e => setNewWisata({...newWisata, description1: e.target.value})}></textarea></div>
                     <div><label className="block text-xs font-bold text-amber-700 mb-1">Deskripsi Lengkap (Paragraf 2)</label><textarea required className="w-full p-2 border-2 border-amber-200 rounded-lg text-sm h-24 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500" value={newWisata.description2} onChange={e => setNewWisata({...newWisata, description2: e.target.value})}></textarea></div>
                     <div className="grid grid-cols-2 gap-4">

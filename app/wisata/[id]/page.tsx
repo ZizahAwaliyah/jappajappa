@@ -7,6 +7,17 @@ import { useParams, useSearchParams } from "next/navigation";
 import { ChevronLeft, ThumbsUp, Link as LinkIcon, MessageCircle, Instagram, Clock, Map, Loader2, Star, Send } from "lucide-react";
 import BottomNavBar from "../../components/Header";
 import WishlistButtonDetail from "../../components/WishlistButtonDetail";
+import dynamic from "next/dynamic";
+
+// Import MapViewer dengan dynamic import untuk menghindari error SSR
+const MapViewer = dynamic(() => import("../../components/MapViewer"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-full w-full bg-gray-100 animate-pulse rounded-2xl flex items-center justify-center text-gray-400 text-sm">
+      Memuat Peta...
+    </div>
+  ),
+});
 // IMPORT FIREBASE
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -185,9 +196,30 @@ export default function WisataDetailPage() {
             </div>
           )}
 
-          <p className="text-gray-600 leading-relaxed text-sm md:text-base text-justify mb-10 whitespace-pre-wrap">
+          <p className="text-gray-600 leading-relaxed text-sm md:text-base text-justify mb-6 whitespace-pre-wrap">
             {wisata.description2}
           </p>
+
+          {/* === SECTION PETA LOKASI === */}
+          {wisata.latitude && wisata.longitude && (
+            <div className="mb-10">
+              <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <Map className="w-5 h-5 text-blue-600" />
+                Lokasi di Peta
+              </h3>
+              <div className="w-full h-[300px] md:h-[400px] rounded-2xl overflow-hidden shadow-lg border border-gray-200">
+                <MapViewer
+                  lat={wisata.latitude}
+                  lng={wisata.longitude}
+                  popupText={wisata.title}
+                />
+              </div>
+              <div className="mt-3 flex items-start gap-2 text-sm text-gray-600">
+                <Map className="w-4 h-4 mt-0.5 text-gray-400" />
+                <span>{wisata.location || wisata.address || "Lokasi wisata"}</span>
+              </div>
+            </div>
+          )}
 
           {/* === INTERAKSI LIKE & SHARE === */}
           <div className="flex flex-col items-center space-y-8 mb-12">

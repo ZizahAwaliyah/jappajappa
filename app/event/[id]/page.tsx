@@ -4,9 +4,20 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
-import { ChevronLeft, MapPin, Calendar, Clock, Armchair, X, Minus, Plus, Loader2, ExternalLink, Heart, Share2 } from "lucide-react";
+import { ChevronLeft, MapPin, Calendar, Clock, Armchair, X, Minus, Plus, Loader2, ExternalLink, Heart, Share2, Map } from "lucide-react";
 import BottomNavBar from "../../components/Header";
 import WishlistButtonDetail from "../../components/WishlistButtonDetail";
+import dynamic from "next/dynamic";
+
+// Import MapViewer dengan dynamic import untuk menghindari error SSR
+const MapViewer = dynamic(() => import("../../components/MapViewer"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-full w-full bg-gray-100 animate-pulse rounded-2xl flex items-center justify-center text-gray-400 text-sm">
+      Memuat Peta...
+    </div>
+  ),
+});
 // IMPORT FIREBASE
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -178,8 +189,8 @@ export default function EventDetailPage() {
                         </div>
                         <div className="flex items-center justify-between md:justify-end md:gap-4 w-full md:w-auto">
                             <span className="font-bold text-blue-600 text-base mr-4">Rp {Number(event.price).toLocaleString('id-ID')}</span>
-                            <button 
-                                onClick={() => handleSelectTicket({ name: "General Admission", price: event.price })} 
+                            <button
+                                onClick={() => handleSelectTicket({ name: "General Admission", price: event.price })}
                                 className="bg-[#A05398] hover:bg-[#8e4586] text-white text-xs font-bold px-5 py-2.5 rounded-full transition-transform active:scale-95 shadow-md"
                             >
                                 Beli Tiket
@@ -187,6 +198,27 @@ export default function EventDetailPage() {
                         </div>
                     </div>
                  </div>
+
+                 {/* === SECTION PETA LOKASI === */}
+                 {event.latitude && event.longitude && (
+                   <div className="mb-6">
+                     <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                       <Map className="w-5 h-5 text-blue-600" />
+                       Lokasi Event
+                     </h2>
+                     <div className="w-full h-[300px] md:h-[400px] rounded-2xl overflow-hidden shadow-lg border border-gray-200">
+                       <MapViewer
+                         lat={event.latitude}
+                         lng={event.longitude}
+                         popupText={event.title}
+                       />
+                     </div>
+                     <div className="mt-3 flex items-start gap-2 text-sm text-gray-600">
+                       <MapPin className="w-4 h-4 mt-0.5 text-red-500" />
+                       <span>{event.location}</span>
+                     </div>
+                   </div>
+                 )}
               </div>
             </div>
             
